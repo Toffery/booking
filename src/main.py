@@ -1,0 +1,24 @@
+from fastapi import FastAPI
+import uvicorn
+
+
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).parent.parent))
+
+
+from src.hotels.router import router as router_hotels
+
+
+app = FastAPI(title="Learning FastAPI")
+
+app.include_router(router_hotels)
+
+@app.get("/")
+async def root():
+    return {
+        "message": "Welcome to this amazing API!"
+    }
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", reload=True)

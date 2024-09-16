@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from schemas.hotels import Hotel, HotelPUT
+from src.hotels.schemas import Hotel, HotelPUT
 
 
 hotels = [
@@ -18,11 +18,12 @@ hotels = [
 
 router = APIRouter(prefix="/hotels")
 
-@router.get("/")
-async def root():
-    return {"message": "Hello from FastAPI"}
 
-@router.get("/hotels")
+@router.get(
+    "/", 
+    description="Ручка для получения всех отелей с пагинацией",
+    summary="Получить все отели"
+)
 async def get_hotels(
     page: int|None = 1,
     per_page: int|None = 5
@@ -35,14 +36,22 @@ async def get_hotels(
         "hotels": hotels[start:end]
     }
 
-@router.post("/hotels")
+@router.post(
+    "/",
+    summary="Создать отель",
+    description="Создание нового отеля.",
+)
 async def create_hotel(hotel: Hotel):
     new_hotel = hotel.model_dump()
     hotels.append(new_hotel)
     print(hotels)
     return {"message": "Hotel added"}
 
-@router.put("/hotels")
+@router.put(
+    "/",
+    summary="Обновить отель",
+    description="Обновление существующего отеля.",
+)
 async def update_hotel(
     hotel_data: Hotel,
 ):
@@ -52,7 +61,13 @@ async def update_hotel(
     print(hotels)
     return hotel
 
-@router.patch("/hotels/{hotel_id}")
+@router.patch(
+    "/{hotel_id}",
+    summary="Обновить отдельную информацию об отеле",
+    description="Обновление существующего отеля. \
+        Возможно как обновить какие-либо поля по отдельности, так и полностью, \
+        но для полного обновления лучше воспользоваться ручкой с методом PUT 'Обновить отель'."
+)
 async def patch_hotel(
     hotel_id: int, 
     hotel_data: HotelPUT
@@ -65,7 +80,11 @@ async def patch_hotel(
     print(hotels)
     return hotel
 
-@router.delete("/hotels/{hotel_id}")
+@router.delete(
+    "/{hotel_id}",
+    summary="Удалить отель",
+    description="Удаление существующего отеля по его id."
+)
 async def delete_hotel(hotel_id: int):
     global hotels
     hotels = [hotel for hotel in hotels if hotel["id"] != hotel_id]
