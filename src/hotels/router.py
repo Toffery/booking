@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from src.hotels.schemas import Hotel, HotelPUT
+from src.hotels.dependencies import PaginatorDep
 
 
 hotels = [
@@ -25,14 +26,13 @@ router = APIRouter(prefix="/hotels")
     summary="Получить все отели"
 )
 async def get_hotels(
-    page: int|None = 1,
-    per_page: int|None = 5
+    paginator: PaginatorDep
 ):
-    start = (page - 1) * per_page
-    end = start + per_page
+    start = (paginator.page - 1) * paginator.per_page
+    end = start + paginator.per_page
     return {
-        "page": page,
-        "per_page": per_page,
+        "page": paginator.page,
+        "per_page": paginator.per_page,
         "hotels": hotels[start:end]
     }
 
