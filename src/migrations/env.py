@@ -7,6 +7,7 @@ from alembic import context
 
 from src.database import Base
 from src.hotels.models import Hotel
+from src.rooms.models import Room
 from src.config import settings
 
 
