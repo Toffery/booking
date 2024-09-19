@@ -1,11 +1,13 @@
 from pydantic import BaseModel
 
 
-class Hotel(BaseModel):
-    id: int
+class HotelCreate(BaseModel):
     title: str
-    description: str
+    location: str
+
+class HotelUpdate(HotelCreate):
+    id: int
 
 class HotelPUT(BaseModel):
     title: str | None = None
-    description: str | None = None
+    location: str | None = None

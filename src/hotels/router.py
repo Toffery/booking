@@ -1,6 +1,10 @@
-from fastapi import APIRouter
-from src.hotels.schemas import Hotel, HotelPUT
+from fastapi import APIRouter, Body
+from src.hotels.schemas import HotelCreate, HotelPUT, HotelUpdate
 from src.hotels.dependencies import PaginatorDep
+from src.hotels.models import Hotel
+
+from sqlalchemy import insert, select
+from database import async_session_maker
 
 
 hotels = [
@@ -22,29 +26,58 @@ router = APIRouter(prefix="/hotels")
 
 @router.get(
     "/", 
-    description="Ручка для получения всех отелей с пагинацией",
+    description="Ручка для получения всех отелей",
     summary="Получить все отели"
 )
-async def get_hotels(
-    paginator: PaginatorDep
-):
-    start = (paginator.page - 1) * paginator.per_page
-    end = start + paginator.per_page
-    return {
-        "page": paginator.page,
-        "per_page": paginator.per_page,
-        "hotels": hotels[start:end]
-    }
+# async def get_hotels(
+#     paginator: PaginatorDep
+# ):
+#     start = (paginator.page - 1) * paginator.per_page
+#     end = start + paginator.per_page
+#     return {
+#         "page": paginator.page,
+#         "per_page": paginator.per_page,
+#         "hotels": hotels[start:end]
+#     }
+async def get_hotels():
+    async with async_session_maker() as session:
+        async with session.begin():
+            query = select(Hotel)
+            result = await session.execute(query)
+    hotels = result.scalars().all()
+    
+    return hotels
 
 @router.post(
     "/",
     summary="Создать отель",
     description="Создание нового отеля.",
 )
-async def create_hotel(hotel: Hotel):
-    new_hotel = hotel.model_dump()
-    hotels.append(new_hotel)
-    print(hotels)
+async def create_hotel(
+    hotel: HotelCreate = Body(
+        openapi_examples={
+            "1": {
+                "summary": "Абстрактный отель",
+                "value": {
+                    "title": "New Hotel",
+                    "location": "Abstract Hotel location",
+                }
+            },
+            "2": {
+                "summary": "Лучший отель",
+                "value": {
+                    "title": "The best Hotel",
+                    "location": "Yoshkar-Ola, Panfilova st. 1",
+                }
+            },
+        }
+    )
+):
+    async with async_session_maker() as session:
+        async with session.begin():
+            add_hotel_stmt = insert(Hotel).values(**hotel.model_dump())
+            await session.execute(add_hotel_stmt)
+            
     return {"message": "Hotel added"}
 
 @router.put(
@@ -53,7 +86,7 @@ async def create_hotel(hotel: Hotel):
     description="Обновление существующего отеля.",
 )
 async def update_hotel(
-    hotel_data: Hotel,
+    hotel_data: HotelUpdate,
 ):
     hotel = [hotel for hotel in hotels if hotel["id"] == hotel_data.id][0]
     hotel["title"] = hotel_data.title
