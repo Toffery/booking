@@ -3,7 +3,7 @@ from src.hotels.schemas import HotelCreate, HotelPUT, HotelUpdate
 from src.hotels.dependencies import PaginatorDep
 from src.hotels.models import Hotel
 
-from sqlalchemy import func, insert, select
+from sqlalchemy import func, insert, select, update, delete
 from database import async_session_maker
 
 
@@ -122,8 +122,8 @@ async def patch_hotel(
     hotel = [hotel for hotel in hotels if hotel["id"] == hotel_id][0]
     if hotel_data.title:
         hotel["title"] = hotel_data.title
-    if hotel_data.description:
-        hotel["description"] = hotel_data.description
+    if hotel_data.location:
+        hotel["description"] = hotel_data.location
     print(hotels)
     return hotel
 
