@@ -3,7 +3,7 @@ from src.hotels.schemas import HotelCreate, HotelPUT, HotelUpdate
 from src.hotels.dependencies import PaginatorDep
 from src.hotels.models import Hotel
 
-from sqlalchemy import insert, select
+from sqlalchemy import func, insert, select
 from database import async_session_maker
 
 
@@ -26,8 +26,7 @@ router = APIRouter(prefix="/hotels")
 
 @router.get(
     "/", 
-    description="""Ручка для получения всех отелей 
-    с пагинацией и фильтрацией по полям title и location""",
+
     summary="Получить все отели"
 )
 async def get_hotels(
@@ -35,15 +34,24 @@ async def get_hotels(
     location: str | None = None,
     title: str | None = None
 ):
+    """
+    Ручка для получения всех отелей 
+    с пагинацией и фильтрацией по полям `title` и `location`.
+
+    Фильтрация не чувствительна к регистру.
+    """
     start = (paginator.page - 1) * paginator.per_page
-    end = start + paginator.per_page
+    end = paginator.per_page
+    
     async with async_session_maker() as session:
         async with session.begin():
             query = select(Hotel)
             if location:
-                query = query.filter(Hotel.location.ilike(f"%{location}%"))
+                location = location.strip().lower()
+                query = query.filter(func.lower(Hotel.location).contains(location))
             if title:
-                query = query.filter(Hotel.title.ilike(f"%{title}%"))
+                title = title.strip().lower()
+                query = query.filter(func.lower(Hotel.title).contains(title))
             query = (
                 query
                 .offset(start)
