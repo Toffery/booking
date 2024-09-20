@@ -26,23 +26,29 @@ router = APIRouter(prefix="/hotels")
 
 @router.get(
     "/", 
-    description="Ручка для получения всех отелей",
+    description="""Ручка для получения всех отелей 
+    с пагинацией и фильтрацией по полям title и location""",
     summary="Получить все отели"
 )
-# async def get_hotels(
-#     paginator: PaginatorDep
-# ):
-#     start = (paginator.page - 1) * paginator.per_page
-#     end = start + paginator.per_page
-#     return {
-#         "page": paginator.page,
-#         "per_page": paginator.per_page,
-#         "hotels": hotels[start:end]
-#     }
-async def get_hotels():
+async def get_hotels(
+    paginator: PaginatorDep,
+    location: str | None = None,
+    title: str | None = None
+):
+    start = (paginator.page - 1) * paginator.per_page
+    end = start + paginator.per_page
     async with async_session_maker() as session:
         async with session.begin():
             query = select(Hotel)
+            if location:
+                query = query.filter(Hotel.location.ilike(f"%{location}%"))
+            if title:
+                query = query.filter(Hotel.title.ilike(f"%{title}%"))
+            query = (
+                query
+                .offset(start)
+                .limit(end)
+            )
             result = await session.execute(query)
     hotels = result.scalars().all()
     
