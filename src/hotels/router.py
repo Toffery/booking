@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Body
+from repositories.hotels import HotelRepository
 from src.hotels.schemas import HotelCreate, HotelPUT, HotelUpdate
 from src.hotels.dependencies import PaginatorDep
 from src.hotels.models import Hotel
@@ -40,27 +41,29 @@ async def get_hotels(
 
     Фильтрация не чувствительна к регистру.
     """
-    start = (paginator.page - 1) * paginator.per_page
-    end = paginator.per_page
+    # start = (paginator.page - 1) * paginator.per_page
+    # end = paginator.per_page
     
+    # async with async_session_maker() as session:
+    #     async with session.begin():
+    #         query = select(Hotel)
+    #         if location:
+    #             location = location.strip().lower()
+    #             query = query.filter(func.lower(Hotel.location).contains(location))
+    #         if title:
+    #             title = title.strip().lower()
+    #             query = query.filter(func.lower(Hotel.title).contains(title))
+    #         query = (
+    #             query
+    #             .offset(start)
+    #             .limit(end)
+    #         )
+    #         result = await session.execute(query)
+    # hotels = result.scalars().all()
+    
+    # return hotels
     async with async_session_maker() as session:
-        async with session.begin():
-            query = select(Hotel)
-            if location:
-                location = location.strip().lower()
-                query = query.filter(func.lower(Hotel.location).contains(location))
-            if title:
-                title = title.strip().lower()
-                query = query.filter(func.lower(Hotel.title).contains(title))
-            query = (
-                query
-                .offset(start)
-                .limit(end)
-            )
-            result = await session.execute(query)
-    hotels = result.scalars().all()
-    
-    return hotels
+        return await HotelRepository(session=session).get_all()
 
 @router.post(
     "/",
