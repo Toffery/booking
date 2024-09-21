@@ -1,5 +1,5 @@
 from src.database import async_session_maker
-from sqlalchemy import select
+from sqlalchemy import insert, select, update
 
 class BaseRepository:
     model = None
@@ -7,7 +7,7 @@ class BaseRepository:
         self.session = session
 
 
-    async def get_all(self):
+    async def get_all(self, *args, **kwargs):
         query = select(self.model)
         result = await self.session.execute(query)
 
@@ -19,3 +19,9 @@ class BaseRepository:
         result = await self.session.execute(query)
 
         return result.scalars().one_or_none()
+
+    async def add(self, *args, **kwargs):
+        async with self.session.bigen():
+            stmt = insert(self.model).values(**kwargs)
+            await self.session.execute(stmt)
+        return "Updated"

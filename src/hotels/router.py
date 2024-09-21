@@ -41,6 +41,16 @@ async def get_hotels(
 
     Фильтрация не чувствительна к регистру.
     """
+    offset = (paginator.page - 1) * paginator.per_page
+    limit = paginator.per_page
+    
+    async with async_session_maker() as session:
+        return await HotelRepository(session=session).get_all(
+            location=location,
+            title=title,
+            limit=limit,
+            offset=offset
+        )
     # start = (paginator.page - 1) * paginator.per_page
     # end = paginator.per_page
     
@@ -62,8 +72,6 @@ async def get_hotels(
     # hotels = result.scalars().all()
     
     # return hotels
-    async with async_session_maker() as session:
-        return await HotelRepository(session=session).get_all()
 
 @router.post(
     "/",
@@ -91,11 +99,15 @@ async def create_hotel(
     )
 ):
     async with async_session_maker() as session:
-        async with session.begin():
-            add_hotel_stmt = insert(Hotel).values(**hotel.model_dump())
-            await session.execute(add_hotel_stmt)
-            
-    return {"message": "Hotel added"}
+        ret_hotel = await HotelRepository(session=session).add(
+            hotel_data=hotel.model_dump()
+        )
+        await session.commit()
+     
+    return {
+        "message": "Hotel added",
+        "data": ret_hotel.scalars().all()
+    }
 
 @router.put(
     "/",
