@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, Body, Query
 from repositories.hotels import HotelRepository
 from src.hotels.schemas import HotelCreate, HotelPUT, HotelUpdate
 from src.hotels.dependencies import PaginatorDep
@@ -79,7 +79,7 @@ async def get_hotels(
     description="Создание нового отеля.",
 )
 async def create_hotel(
-    hotel: HotelCreate = Body(
+    hotel_data: HotelCreate = Body(
         openapi_examples={
             "1": {
                 "summary": "Абстрактный отель",
@@ -100,10 +100,10 @@ async def create_hotel(
 ):
     async with async_session_maker() as session:
         ret_hotel = await HotelRepository(session=session).add(
-            hotel_data=hotel.model_dump()
+            hotel_data=hotel_data
         )
         await session.commit()
-     
+    
     return {
         "message": "Hotel added",
         "data": ret_hotel.scalars().all()
@@ -115,13 +115,20 @@ async def create_hotel(
     description="Обновление существующего отеля.",
 )
 async def update_hotel(
-    hotel_data: HotelUpdate,
+    hotel_id: int = Query(),
+    hotel_data: HotelPUT = Body(),
 ):
-    hotel = [hotel for hotel in hotels if hotel["id"] == hotel_data.id][0]
-    hotel["title"] = hotel_data.title
-    hotel["description"] = hotel_data.description
-    print(hotels)
-    return hotel
+    async with async_session_maker() as session:
+        ret_hotel = await HotelRepository(session=session).edit(
+            data=hotel_data,
+            id=hotel_id,
+        )
+        await session.commit()
+    
+    return {
+        "message": "Hotel updated",
+        "data": ret_hotel
+    }
 
 @router.patch(
     "/{hotel_id}",
@@ -148,6 +155,13 @@ async def patch_hotel(
     description="Удаление существующего отеля по его id."
 )
 async def delete_hotel(hotel_id: int):
-    global hotels
-    hotels = [hotel for hotel in hotels if hotel["id"] != hotel_id]
-    return {"message": "Hotel deleted"}
+    async with async_session_maker() as session:
+        ret_hotel = await HotelRepository(session=session).delete(
+            id=hotel_id
+        )
+        await session.commit()
+    
+    return {
+        "message": "Hotel deleted",
+        "data": ret_hotel
+    }

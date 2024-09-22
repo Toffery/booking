@@ -1,4 +1,5 @@
 from sqlalchemy import func, insert, select
+from hotels.schemas import HotelCreate
 from src.hotels.models import Hotel
 from repositories.baserepo import BaseRepository
 
@@ -29,6 +30,6 @@ class HotelRepository(BaseRepository):
             result = await self.session.execute(query)
         return result.scalars().all()
 
-    async def add(self, hotel_data: dict):
-        stmt = insert(self.model).values(**hotel_data).returning(self.model)
+    async def add(self, hotel_data: HotelCreate):
+        stmt = insert(self.model).values(**hotel_data.model_dump()).returning(self.model)
         return await self.session.execute(stmt)
