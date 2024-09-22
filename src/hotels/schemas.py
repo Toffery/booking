@@ -1,13 +1,16 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class HotelCreate(BaseModel):
     title: str
     location: str
 
-class HotelUpdate(HotelCreate):
-    id: int
 
 class HotelPUT(BaseModel):
-    title: str | None = None
-    location: str | None = None
+    title: str
+    location: str
+
+
+class HotelPATCH(BaseModel):
+    title: str | None = Field(default=None)
+    location: str | None = Field(default=None)
