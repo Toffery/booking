@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Body
-from repositories.hotels import HotelRepository
+from src.repositories.hotels import HotelRepository
 from src.hotels.schemas import HotelCreate, HotelPATCH, HotelPUT
 from src.hotels.dependencies import PaginatorDep
 
