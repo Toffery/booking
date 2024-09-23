@@ -1,10 +1,8 @@
-from fastapi import APIRouter, Body, Query
+from fastapi import APIRouter, Body
 from repositories.hotels import HotelRepository
 from src.hotels.schemas import HotelCreate, HotelPATCH, HotelPUT
 from src.hotels.dependencies import PaginatorDep
-from src.hotels.models import Hotel
 
-from sqlalchemy import func, insert, select, update, delete
 from database import async_session_maker
 
 
