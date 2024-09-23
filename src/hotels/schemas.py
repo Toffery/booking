@@ -6,12 +6,6 @@ class HotelCreate(BaseModel):
     location: str
 
 
-class HotelSchema(HotelCreate):
-    id: int
-
-    model_config = ConfigDict(from_attributes=True)
-
-
 class HotelPUT(BaseModel):
     title: str
     location: str
@@ -20,3 +14,9 @@ class HotelPUT(BaseModel):
 class HotelPATCH(BaseModel):
     title: str | None = Field(default=None)
     location: str | None = Field(default=None)
+
+
+class HotelSchema(HotelCreate):
+    id: int
+
+    model_config = ConfigDict(from_attributes=True)
