@@ -6,10 +6,12 @@ from fastapi import FastAPI
 import uvicorn
 
 from src.hotels.router import router as router_hotels
+from src.auth.router import router as router_auth
 
 
 app = FastAPI(title="Learning FastAPI")
 
+app.include_router(router_auth)
 app.include_router(router_hotels)
 
 @app.get("/")

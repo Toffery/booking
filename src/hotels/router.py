@@ -6,21 +6,7 @@ from src.hotels.dependencies import PaginatorDep
 from database import async_session_maker
 
 
-hotels = [
-    {"id": 1, "title": "Sochi", "description": "Hotel in sochi"},
-    {"id": 2, "title": "Moscow", "description": "Hotel in moscow"},
-    {"id": 3, "title": "Berlin", "description": "Hotel in berlin"},
-    {"id": 4, "title": "London", "description": "Hotel in london"},
-    {"id": 5, "title": "Paris", "description": "Hotel in paris"},
-    {"id": 6, "title": "Rome", "description": "Hotel in rome"},
-    {"id": 7, "title": "New York", "description": "Hotel in new york"},
-    {"id": 8, "title": "Tokyo", "description": "Hotel in tokyo"},
-    {"id": 9, "title": "Sydney", "description": "Hotel in sydney"},
-    {"id": 10, "title": "Amsterdam", "description": "Hotel in amsterdam"},
-    {"id": 11, "title": "Amman", "description": "Hotel in amman"},
-]
-
-router = APIRouter(prefix="/hotels")
+router = APIRouter(prefix="/hotels", tags=["Hotels"])
 
 
 @router.get(
