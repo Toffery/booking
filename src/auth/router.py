@@ -2,7 +2,7 @@ from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, Response
 from sqlalchemy.exc import IntegrityError
 
-from auth.schemas import UserIn, UserCreate, UserInDB
+from src.auth.schemas import UserIn, UserCreate
 from database import async_session_maker
 
 from passlib.context import CryptContext
@@ -10,6 +10,9 @@ import jwt
 
 from repositories.auth import AuthRepository
 
+import jwt
+from src.repositories.auth import AuthRepository
+from src.config import auth_settings
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 SECRET_KEY = "c7c3a5944c21320762a0755f302d81362ee773ad016fc7287451d88a40b0443d"
@@ -17,6 +20,11 @@ ALGHORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 router= APIRouter(prefix="/auth", tags=["Auth"])
+SECRET_KEY = auth_settings.JWT_SECRET
+ALGORITHM = auth_settings.JWT_ALG
+ACCESS_TOKEN_EXPIRE_MINUTES = auth_settings.JWT_EXP
+REFRESH_TOKEN_EXPIRE_MINUTES = auth_settings.REFRESH_TOKEN_EXP
+
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
