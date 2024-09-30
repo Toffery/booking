@@ -17,14 +17,15 @@ class UserCreate(BaseModel):
     username: str | None = None
 
 
-class UserSchema(UserCreate):
+class UserInDB(UserCreate):
     id: int
     
     model_config = ConfigDict(from_attributes=True)
 
-class UserInDB(BaseModel):
-    id: int
-    email: EmailStr
-    username: str | None = None
+# class UserInDB(BaseModel):
+#     id: int
+#     email: EmailStr
+#     username: str | None = None
+#     hashed_password: str
 
     
