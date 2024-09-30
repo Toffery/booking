@@ -9,7 +9,6 @@ class AuthSettings(BaseSettings):
 
     REFRESH_TOKEN_KEY: str
     REFRESH_TOKEN_EXP: timedelta = timedelta(days=30)
-
     
     model_config = SettingsConfigDict(env_file="src/auth/.env")
 

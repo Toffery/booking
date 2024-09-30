@@ -11,7 +11,6 @@ class UserIn(BaseModel):
 
 
 class UserCreate(BaseModel):
-    
     email: EmailStr
     hashed_password: str
     username: str | None = None
@@ -21,11 +20,3 @@ class UserInDB(UserCreate):
     id: int
     
     model_config = ConfigDict(from_attributes=True)
-
-# class UserInDB(BaseModel):
-#     id: int
-#     email: EmailStr
-#     username: str | None = None
-#     hashed_password: str
-
-    
