@@ -1,4 +1,6 @@
 from datetime import datetime, timezone, timedelta
+
+from fastapi import HTTPException
 from src.auth.config import auth_settings
 
 import jwt
@@ -12,6 +14,7 @@ REFRESH_TOKEN_EXPIRE_MINUTES = auth_settings.REFRESH_TOKEN_EXP
 
 
 class AuthService:
+
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
     def verify_password(self, plain_password, hashed_password):
         return self.pwd_context.verify(plain_password, hashed_password)
@@ -21,14 +24,21 @@ class AuthService:
         return self.pwd_context.hash(password)
 
 
-    def create_access_token(self, data: dict, expires_delta: int | None = None):
+    def create_access_token(
+            self, 
+            data: dict, 
+            expires_delta: int | None = None
+        ):
         to_encode = data.copy()
+        
         if expires_delta:
             expire = datetime.now(timezone.utc) + expires_delta
         else:
             expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        
         to_encode.update({"exp": expire})
         encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+        
         return encoded_jwt
 
     
@@ -37,7 +47,12 @@ class AuthService:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
             return payload
         except jwt.ExpiredSignatureError:
-            raise Exception("access token expired")
+            raise HTTPException(
+                status_code=401, 
+                detail="Token has been expired"
+            )
         except jwt.InvalidTokenError:
-            raise Exception("invalid token")
-        
+            raise HTTPException(
+                status_code=401, 
+                detail="Invalid token"
+            )

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Request, Response
 from sqlalchemy.exc import IntegrityError
 
+from src.auth.dependencies import GetUserIdDep
 from src.auth.schemas import UserIn, UserCreate, UserInDB
 from database import async_session_maker
 
@@ -63,20 +64,18 @@ async def login(
         }
 
 
-@router.get("/me")
-async def me(
-    request: Request
+@router.get(
+    "/me",
+    summary="Получить текущего аутентифицированного пользователя"
+)
+async def get_me(
+    user_id: GetUserIdDep
 ):
-    cookies = request.cookies
-    access_token = cookies.get("access_token")
-    try:
-        payload = AuthService().decode_access_token(access_token)
-    except:
-        return {
-            "message": "Invalid credentials"
-        }
-    user_id = payload.get("user_id")
-
+    """
+    Ручка для получения текущего аутентифицированного пользователя.
+    
+    Проверка на аутентификацию производится через jwt токен.
+    """
     async with async_session_maker() as session:
         user = await AuthRepository(session=session).get_one_or_none(
             id=user_id
@@ -85,5 +84,4 @@ async def me(
         return {
             "message": "User not found"
         }
-    
-    return user
+    return {"message": f"Hello, {user.username or user.email}! Welcome back!"}
