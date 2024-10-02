@@ -1,7 +1,7 @@
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class HotelCreate(BaseModel):
+class HotelCreateOrUpdate(BaseModel):
     title: str
     location: str
 
@@ -16,7 +16,7 @@ class HotelPATCH(BaseModel):
     location: str | None = Field(default=None)
 
 
-class HotelSchema(HotelCreate):
+class HotelInDB(HotelCreateOrUpdate):
     id: int
 
     model_config = ConfigDict(from_attributes=True)

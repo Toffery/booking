@@ -1,12 +1,12 @@
 from sqlalchemy import func, insert, select
-from src.hotels.schemas import HotelSchema
+from src.hotels.schemas import HotelInDB
 from src.hotels.models import Hotel
 from src.repositories.baserepo import BaseRepository
 
 
 class HotelRepository(BaseRepository):
     model = Hotel
-    schema = HotelSchema
+    schema = HotelInDB
 
     async def get_all(
         self, 
@@ -14,7 +14,7 @@ class HotelRepository(BaseRepository):
         title: str | None = None,
         limit: int = 5,
         offset: int = 0
-    ) -> list[HotelSchema]:
+    ) -> list[HotelInDB]:
         query = select(Hotel)
         if location:
             location = location.strip().lower()
@@ -30,6 +30,6 @@ class HotelRepository(BaseRepository):
         result = await self.session.execute(query)
         return [self.schema.model_validate(model) for model in result.scalars().all()]
 
-    async def add(self, hotel_data: HotelSchema):
+    async def add(self, hotel_data: HotelInDB):
         stmt = insert(Hotel).values(**hotel_data.model_dump()).returning(Hotel)
         return await self.session.execute(stmt)
