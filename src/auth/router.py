@@ -60,8 +60,18 @@ async def login(
         )
         return {
             "access_token": access_token, 
-            "token_type": "bearer"
+            "token_type": "cookie"
         }
+
+
+@router.post("/logout")
+async def logout(
+    response: Response
+):
+    response.delete_cookie(key="access_token")
+    return {
+        "message": "You successfully logged out"
+    }
 
 
 @router.get(
