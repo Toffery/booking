@@ -1,9 +1,8 @@
+from datetime import datetime, timezone, timedelta
 from src.auth.config import auth_settings
 
 import jwt
 from passlib.context import CryptContext
-from datetime import datetime, timezone, timedelta
-
 
 
 SECRET_KEY = auth_settings.JWT_SECRET
@@ -13,7 +12,6 @@ REFRESH_TOKEN_EXPIRE_MINUTES = auth_settings.REFRESH_TOKEN_EXP
 
 
 class AuthService:
-
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
     def verify_password(self, plain_password, hashed_password):
         return self.pwd_context.verify(plain_password, hashed_password)
@@ -32,3 +30,14 @@ class AuthService:
         to_encode.update({"exp": expire})
         encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
         return encoded_jwt
+
+    
+    def decode_access_token(self, token: str) -> dict[str, str]:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            return payload
+        except jwt.ExpiredSignatureError:
+            raise Exception("access token expired")
+        except jwt.InvalidTokenError:
+            raise Exception("invalid token")
+        
