@@ -16,14 +16,3 @@ class RoomRepository(BaseRepository):
         )
         result = await self.session.execute(query)
         return [self.schema.model_validate(model) for model in result.scalars().all()]
-    
-
-    # async def add(self, data: RoomCreate):
-    #     stmt = (
-    #         insert(self.model)
-    #         .values(**data.model_dump())
-    #         .returning(self.model)
-    #     )
-    #     result = await self.session.execute(stmt)
-    #     model = result.scalars().one()
-    #     return self.schema.model_validate(model)

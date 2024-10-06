@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 
 class UserIn(BaseModel):
@@ -20,6 +20,7 @@ class UserSchema(BaseModel):
     id: int
     email: EmailStr
     username: str | None = None
+
     model_config = ConfigDict(from_attributes=True)
 
 

@@ -1,7 +1,7 @@
 from sqlalchemy import select
-from src.auth.models import User
-from src.auth.schemas import UserInDB, UserSchema
-from repositories.baserepo import BaseRepository
+from src.users.models import User
+from src.users.schemas import UserInDB, UserSchema
+from src.repositories.baserepo import BaseRepository
 
 
 class AuthRepository(BaseRepository):
