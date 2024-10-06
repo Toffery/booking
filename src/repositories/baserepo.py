@@ -27,6 +27,7 @@ class BaseRepository:
             return None
         return self.schema.model_validate(model)
 
+
     async def add(self, data: BaseModel):
         stmt = (
             insert(self.model)
@@ -51,6 +52,5 @@ class BaseRepository:
 
     async def delete(self, **filter_by):
         stmt = delete(self.model).filter_by(**filter_by).returning(self.model)
-        # print(compile(stmt))
         result = await self.session.execute(stmt)
         return result.scalars().one()

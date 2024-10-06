@@ -2,7 +2,7 @@ from fastapi import APIRouter, Body
 from src.database import async_session_maker
 
 from src.repositories.rooms import RoomRepository
-from src.rooms.schemas import RoomCreate, RoomPATCH, RoomUpdate
+from src.rooms.schemas import RoomCreate, RoomPATCH, RoomUpdate, RoomIn
 
 router = APIRouter(prefix="/hotels", tags=["Rooms"])
 
@@ -16,19 +16,34 @@ async def get_rooms(hotel_id: int):
         return await RoomRepository(session=session).get_all(hotel_id)
 
 
+@router.get(
+    "/{hotel_id}/rooms/{room_id}",
+    summary="Получить конкретный номер конкретного отеля"
+)
+async def get_single_room(
+    hotel_id: int,
+    room_id: int
+):
+    async with async_session_maker() as session:
+        return await RoomRepository(session=session).get_one_or_none(
+            hotel_id=hotel_id,
+            id=room_id
+        )
+
+
 @router.post(
-    "/new_room",
+    "/{hotel_id}/rooms",
     summary="Создать комнату"
 )
 async def create_room(
-    room_data: RoomCreate = Body(
+    hotel_id: int,
+    room_data: RoomIn = Body(
         openapi_examples={
             "1": {
                 "summary": "Абстрактная комната",
                 "value": {
-                    "hotel_id": 1,
-                    "title": "Room 1",
-                    "description": "Room 1 description",
+                    "title": "Abstract room",
+                    "description": "Abstract room description",
                     "price": 1000,
                     "quantity": 2
                 }
@@ -36,7 +51,6 @@ async def create_room(
             "2": {
                 "summary": "Лучшая комната",
                 "value": {
-                    "hotel_id": 1,
                     "title": "Best Room",
                     "description": "Best Room description",
                     "price": 2000,
@@ -46,8 +60,9 @@ async def create_room(
         }
     )
 ):
+    _room_data = RoomCreate(hotel_id=hotel_id, **room_data.model_dump())
     async with async_session_maker() as session:
-        room = await RoomRepository(session=session).add(data=room_data)
+        room = await RoomRepository(session=session).add(data=_room_data)
         await session.commit()
     return room
 
@@ -123,7 +138,8 @@ async def delete_room(
 ):
     async with async_session_maker() as session:
         await RoomRepository(session=session).delete(
-            id=room_id
+            id=room_id,
+            hotel_id=hotel_id
         )
         await session.commit()
     return {

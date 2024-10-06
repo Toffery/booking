@@ -1,5 +1,5 @@
 from sqlalchemy import func, insert, select
-from src.rooms.schemas import RoomInDB
+from src.rooms.schemas import RoomInDB, RoomCreate
 from src.rooms.models import Room
 from src.repositories.baserepo import BaseRepository
 
@@ -18,12 +18,12 @@ class RoomRepository(BaseRepository):
         return [self.schema.model_validate(model) for model in result.scalars().all()]
     
 
-    async def add(self, data: RoomInDB):
-        stmt = (
-            insert(self.model)
-            .values(**data.model_dump())
-            .returning(self.model)
-        )
-        result = await self.session.execute(stmt)
-        model = result.scalars().one()
-        return self.schema.model_validate(model)
+    # async def add(self, data: RoomCreate):
+    #     stmt = (
+    #         insert(self.model)
+    #         .values(**data.model_dump())
+    #         .returning(self.model)
+    #     )
+    #     result = await self.session.execute(stmt)
+    #     model = result.scalars().one()
+    #     return self.schema.model_validate(model)

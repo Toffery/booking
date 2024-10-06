@@ -1,14 +1,14 @@
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class RoomUpdate(BaseModel):
+class RoomIn(BaseModel):
     title: str
     description: str | None
     price: int
     quantity: int
 
 
-class RoomCreate(RoomUpdate):
+class RoomCreate(RoomIn):
     hotel_id: int
 
 
@@ -16,6 +16,13 @@ class RoomInDB(RoomCreate):
     id: int
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class RoomUpdate(BaseModel):
+    title: str
+    description: str | None
+    price: int
+    quantity: int
 
 
 class RoomPATCH(BaseModel):

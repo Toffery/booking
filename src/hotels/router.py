@@ -3,7 +3,7 @@ from src.repositories.hotels import HotelRepository
 from src.hotels.schemas import HotelCreateOrUpdate, HotelPATCH, HotelPUT
 from src.hotels.dependencies import PaginatorDep
 
-from database import async_session_maker
+from src.database import async_session_maker
 
 
 router = APIRouter(prefix="/hotels", tags=["Hotels"])

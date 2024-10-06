@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, Response
 from sqlalchemy.exc import IntegrityError
 
 from src.auth.dependencies import GetUserIdDep
 from src.auth.schemas import UserIn, UserCreate, UserInDB
-from database import async_session_maker
+from src.database import async_session_maker
 
 from src.repositories.auth import AuthRepository
 from src.auth.service import AuthService
