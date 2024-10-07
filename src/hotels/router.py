@@ -2,6 +2,7 @@ from fastapi import APIRouter, Body
 from src.repositories.hotels import HotelRepository
 from src.hotels.schemas import HotelCreateOrUpdate, HotelPATCH, HotelPUT
 from src.hotels.dependencies import PaginatorDep
+from src.dependencies import DBDep
 
 from src.database import async_session_maker
 
@@ -14,9 +15,10 @@ router = APIRouter(prefix="/hotels", tags=["Hotels"])
     summary="Получить все отели"
 )
 async def get_hotels(
-    paginator: PaginatorDep,
-    location: str | None = None,
-    title: str | None = None
+        paginator: PaginatorDep,
+        db: DBDep,
+        location: str | None = None,
+        title: str | None = None
 ):
     """
     Ручка для получения всех отелей 
@@ -26,14 +28,13 @@ async def get_hotels(
     """
     offset = (paginator.page - 1) * paginator.per_page
     limit = paginator.per_page
-    
-    async with async_session_maker() as session:
-        return await HotelRepository(session=session).get_all(
-            location=location,
-            title=title,
-            limit=limit,
-            offset=offset
-        )
+
+    return await db.hotels.get_all(
+        location=location,
+        title=title,
+        limit=limit,
+        offset=offset
+    )
 
 
 @router.get(
@@ -42,10 +43,10 @@ async def get_hotels(
     description="Получение отеля по его id."
 )
 async def get_hotel_by_id(
-    hotel_id: int
+        hotel_id: int,
+        db: DBDep,
 ):
-    async with async_session_maker() as session:
-        return await HotelRepository(session=session).get_one_or_none(id=hotel_id)
+    return await db.hotels.get_one_or_none(id=hotel_id)
 
 @router.post(
     "/",
@@ -53,30 +54,28 @@ async def get_hotel_by_id(
     description="Создание нового отеля.",
 )
 async def create_hotel(
-    hotel_data: HotelCreateOrUpdate = Body(
-        openapi_examples={
-            "1": {
-                "summary": "Абстрактный отель",
-                "value": {
-                    "title": "New Hotel",
-                    "location": "Abstract Hotel location",
-                }
-            },
-            "2": {
-                "summary": "Лучший отель",
-                "value": {
-                    "title": "The best Hotel",
-                    "location": "Yoshkar-Ola, Panfilova st. 1",
-                }
-            },
-        }
-    )
-):
-    async with async_session_maker() as session:
-        ret_hotel = await HotelRepository(session=session).add(
-            hotel_data=hotel_data
+        db: DBDep,
+        hotel_data: HotelCreateOrUpdate = Body(
+            openapi_examples={
+                "1": {
+                    "summary": "Абстрактный отель",
+                    "value": {
+                        "title": "New Hotel",
+                        "location": "Abstract Hotel location",
+                    }
+                },
+                "2": {
+                    "summary": "Лучший отель",
+                    "value": {
+                        "title": "The best Hotel",
+                        "location": "Yoshkar-Ola, Panfilova st. 1",
+                    }
+                },
+            }
         )
-        await session.commit()
+):
+    ret_hotel = await db.hotels.add(hotel_data=hotel_data)
+    await db.commit()
     
     return {
         "message": "Hotel added",
@@ -89,15 +88,15 @@ async def create_hotel(
     description="Обновление существующего отеля.",
 )
 async def update_hotel(
-    hotel_id: int,
-    hotel_data: HotelPUT = Body(),
+        db: DBDep,
+        hotel_id: int,
+        hotel_data: HotelPUT = Body(),
 ):
-    async with async_session_maker() as session:
-        ret_hotel = await HotelRepository(session=session).edit(
-            data=hotel_data,
-            id=hotel_id,
-        )
-        await session.commit()
+    ret_hotel = await db.hotels.edit(
+        data=hotel_data,
+        id=hotel_id,
+    )
+    await db.commit()
     
     return {
         "message": "Hotel updated",
@@ -112,17 +111,17 @@ async def update_hotel(
         но для полного обновления лучше воспользоваться ручкой с методом PUT 'Обновить отель'."
 )
 async def patch_hotel(
-    hotel_id: int, 
+    db: DBDep,
+    hotel_id: int,
     hotel_data: HotelPATCH = Body()
 ):
-    async with async_session_maker() as session:
-        ret_hotel = await HotelRepository(session=session).edit(
-            data=hotel_data,
-            exclude_unset=True,
-            id=hotel_id,
-        )
-        await session.commit()
-    
+    ret_hotel = await db.hotels.edit(
+        data=hotel_data,
+        exclude_unset=True,
+        id=hotel_id,
+    )
+    await db.commit()
+
     return {
         "message": "Hotel updated",
         "data": ret_hotel
@@ -133,12 +132,12 @@ async def patch_hotel(
     summary="Удалить отель",
     description="Удаление существующего отеля по его id."
 )
-async def delete_hotel(hotel_id: int):
-    async with async_session_maker() as session:
-        ret_hotel = await HotelRepository(session=session).delete(
-            id=hotel_id
-        )
-        await session.commit()
+async def delete_hotel(
+        db: DBDep,
+        hotel_id: int
+):
+    ret_hotel = await db.hotels.delete(id=hotel_id)
+    await db.commit()
     
     return {
         "message": "Hotel deleted",

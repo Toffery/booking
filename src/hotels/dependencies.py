@@ -10,3 +10,5 @@ class PaginatorParams(BaseModel):
 
 
 PaginatorDep = Annotated[PaginatorParams, Depends()]
+
+
