@@ -1,34 +1,34 @@
 from fastapi import APIRouter, Response
 from sqlalchemy.exc import IntegrityError
 
-from src.auth.dependencies import GetUserIdDep
-from src.users.schemas import UserIn, UserCreate, UserInDB
-from src.database import async_session_maker
-
-from src.repositories.auth import AuthRepository
 from src.auth.service import AuthService
+from src.auth.dependencies import GetUserIdDep
+from src.dependencies import DBDep
+from src.users.schemas import UserIn, UserCreate, UserInDB
+
 
 router= APIRouter(prefix="/auth", tags=["Auth"])
 
 
 @router.post("/signup")
-async def sign_up(user_data: UserIn):
+async def sign_up(
+        user_data: UserIn,
+        db: DBDep
+):
     hashed_password = AuthService().get_password_hash(user_data.password)
     new_user = UserCreate(
         email=user_data.email,
         username=user_data.username,
         hashed_password=hashed_password
     )
-    async with async_session_maker() as session:
-        try:
-            await AuthRepository(session=session).add(
-                data=new_user
-            )
-        except IntegrityError:
-            return {
-                "message": "User with this email or username already exist"
-            }
-        await session.commit()
+
+    try:
+        await db.auth.add(new_user)
+    except IntegrityError:
+        return {
+            "message": "User with this email or username already exist"
+        }
+    await db.commit()
 
     return {
         "message": "User successfully created"
@@ -37,61 +37,62 @@ async def sign_up(user_data: UserIn):
 
 @router.post("/login")
 async def login(
-    user_data: UserIn,
-    response: Response
+        user_data: UserIn,
+        response: Response,
+        db: DBDep
 ):
-    async with async_session_maker() as session:
-        user: UserInDB = await AuthRepository(session=session).get_user_in_db(
-            email=user_data.email
-        )
-        if user is None:
-            return {"message": "User with this email doesn't exist"}
-        
-        if not AuthService().verify_password(user_data.password, user.hashed_password):
-            return {
-                "message": "Incorrect password"
-            }
-        access_token = AuthService().create_access_token({"user_id": user.id})
-        response.set_cookie(
-            key="access_token", 
-            value=access_token, 
-            httponly=True, 
-            secure=True
-        )
+    user: UserInDB = await db.auth.get_user_in_db(email=user_data.email)
+
+    if user is None:
+        return {"message": "User with this email doesn't exist"}
+
+    if not AuthService().verify_password(user_data.password, user.hashed_password):
         return {
-            "access_token": access_token, 
-            "token_type": "cookie"
+            "message": "Incorrect password"
         }
+
+    access_token = AuthService().create_access_token({"user_id": user.id})
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        secure=True
+    )
+
+    return {
+        "access_token": access_token,
+        "token_type": "cookie"
+    }
 
 
 @router.post("/logout")
 async def logout(
-    response: Response
+        response: Response
 ):
     response.delete_cookie(key="access_token")
+
     return {
         "message": "You successfully logged out"
     }
 
 
 @router.get(
-    "/me",
-    summary="Получить текущего аутентифицированного пользователя"
+        "/me",
+        summary="Получить текущего аутентифицированного пользователя"
 )
 async def get_me(
-    user_id: GetUserIdDep
+        user_id: GetUserIdDep,
+        db: DBDep
 ):
     """
     Ручка для получения текущего аутентифицированного пользователя.
     
     Проверка на аутентификацию производится через jwt токен.
     """
-    async with async_session_maker() as session:
-        user = await AuthRepository(session=session).get_one_or_none(
-            id=user_id
-        )
+    user = await db.auth.get_one_or_none(id=user_id)
     if user is None:
         return {
             "message": "User not found"
         }
+
     return {"message": f"Hello, {user.username or user.email}! Welcome back!"}
