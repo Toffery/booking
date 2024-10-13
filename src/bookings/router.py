@@ -2,9 +2,35 @@ from fastapi import APIRouter
 
 from src.auth.dependencies import GetUserIdDep
 from src.bookings.schemas import BookingCreate, BookingIn
-from src.dependencies import DBDep
+from src.dependencies import DBDep, PaginatorDep
 
 router = APIRouter(prefix="/bookings", tags=["Бронирования"])
+
+
+@router.get(
+    "/"
+)
+async def get_all_bookings(
+        db: DBDep,
+        paginator: PaginatorDep
+):
+    offset = (paginator.page - 1) * paginator.per_page
+    limit = paginator.per_page
+    return await db.bookings.get_all(
+        limit=limit,
+        offset=offset
+    )
+
+
+@router.get(
+    "/me"
+)
+async def get_my_bookings(
+        db: DBDep,
+        user_id: GetUserIdDep
+):
+    return await db.bookings.get_filtered(user_id=user_id)
+
 
 @router.post(
     "/"
