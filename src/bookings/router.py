@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from src.auth.dependencies import GetUserIdDep
-from src.bookings.schemas import BookingIn, BookingCreate
+from src.bookings.schemas import BookingCreate, BookingIn
 from src.dependencies import DBDep
 
 router = APIRouter(prefix="/bookings", tags=["Бронирования"])
@@ -22,6 +22,7 @@ async def create_booking(
     )
     ret_booking = await db.bookings.add(data=_booking_data)
     await db.commit()
+
 
     return {
         "message": "Booking created",
