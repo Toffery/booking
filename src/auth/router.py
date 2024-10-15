@@ -41,7 +41,10 @@ async def login(
         response: Response,
         db: DBDep
 ):
-    user: UserInDB = await db.auth.get_user_in_db(email=user_data.email)
+    user: UserInDB = await db.auth.get_user_in_db(
+        email=user_data.email,
+        username=user_data.username
+    )
 
     if user is None:
         return {"message": "User with this email doesn't exist"}
