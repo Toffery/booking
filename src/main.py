@@ -10,6 +10,7 @@ from src.auth.router import router as router_auth
 from src.rooms.router import router as router_rooms
 from src.bookings.router import router as router_bookings
 
+
 app = FastAPI(title="Learning FastAPI")
 
 app.include_router(router_auth)
