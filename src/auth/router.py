@@ -1,10 +1,11 @@
+import datetime
 from fastapi import APIRouter, Response
 from sqlalchemy.exc import IntegrityError
 
 from src.auth.service import AuthService
 from src.auth.dependencies import GetUserIdDep
 from src.dependencies import DBDep
-from src.users.schemas import UserIn, UserCreate, UserInDB
+from src.users.schemas import UserIn, UserCreate, UserInDB, UserOut
 
 
 router= APIRouter(prefix="/auth", tags=["Auth"])
@@ -97,5 +98,15 @@ async def get_me(
         return {
             "message": "User not found"
         }
-
-    return {"message": f"Hello, {user.username or user.email}! Welcome back!"}
+    
+    user_out: UserOut = UserOut(
+        **user.model_dump(
+            exclude=[
+                "hashed_password"
+            ]
+        )
+    )
+    return {
+        "message": f"Hello, {user_out.username or user_out.email}! Welcome back!",
+        "data": user_out
+    }
