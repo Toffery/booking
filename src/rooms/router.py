@@ -11,7 +11,7 @@ router = APIRouter(prefix="/hotels", tags=["Rooms"])
 
 @router.get(
     "/{hotel_id}/rooms",
-    summary="Получить все комнаты отеля",
+    summary="Получить все свободные номера для конкретного отеля для переданных дат",
 )
 async def get_rooms(
         hotel_id: int,
@@ -43,7 +43,7 @@ async def get_single_room(
 
 @router.post(
     "/{hotel_id}/rooms",
-    summary="Создать комнату"
+    summary="Создать номер"
 )
 async def create_room(
         hotel_id: int,
@@ -84,7 +84,7 @@ async def create_room(
 
 @router.patch(
     "/{hotel_id}/rooms/{room_id}",
-    summary="Обновить отдельную информацию о комнате конкретного отеля",
+    summary="Обновить отдельную информацию о номере конкретного отеля",
 )
 async def patch_room(
         hotel_id: int,
@@ -116,7 +116,7 @@ async def patch_room(
 
 @router.put(
     "/{hotel_id}/rooms/{room_id}",
-    summary="Полностью обновить данные о комнате конкретного отеля"
+    summary="Полностью обновить данные о номере конкретного отеля"
 )
 async def update_room(
         hotel_id: int,
@@ -147,7 +147,7 @@ async def update_room(
 
 @router.delete(
     "/{hotel_id}/rooms/{room_id}",
-    summary="Удалить комнату",
+    summary="Удалить номер",
 )
 async def delete_room(
         hotel_id: int,

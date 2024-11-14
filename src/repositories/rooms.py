@@ -27,7 +27,10 @@ class RoomRepository(BaseRepository):
             date_from: date,
             date_to: date
     ):
+        f"""
+            Возвращаем СВОБОДНЫЕ номера для отеля {hotel_id} в период {date_from} - {date_to}
         """
+        f"""
         with FIND_OCCUPIED_ROOMS as (
             select room_id, count(*) as num_of_occupied_rooms
             from bookings
@@ -40,8 +43,10 @@ class RoomRepository(BaseRepository):
             on r.id = FIND_OCCUPIED_ROOMS.room_id
         )
         select * from COUNT_FREE_ROOMS
-        where num_of_free_rooms > 0;
+        where num_of_free_rooms > 0 and room_id in 
+        (select id from rooms where hotel_id = {hotel_id});
         """
+
 
         find_occupied_rooms = (
             select(
@@ -73,12 +78,18 @@ class RoomRepository(BaseRepository):
             .cte("count_free_rooms")
         )
 
-        query = (
-            select(count_free_rooms)
-            .where(count_free_rooms.c.num_of_free_rooms > 0)
+        room_ids_of_hotel = (
+            select(Room.id)
+            .select_from(Room)
+            .filter_by(hotel_id=hotel_id)
+            .subquery()
         )
 
-        result = await self.session.execute(query)
+        query = (
+            select(count_free_rooms.c.room_id)
+            .select_from(count_free_rooms)
+            .filter(count_free_rooms.c.num_of_free_rooms > 0,
+                    count_free_rooms.c.room_id.in_(room_ids_of_hotel))
+        )
 
-        return [res for res in result.mappings().all()]
-    
+        return await self.get_filtered(Room.id.in_(query))
