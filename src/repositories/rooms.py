@@ -59,10 +59,11 @@ class RoomRepository(BaseRepository):
             .cte("find_occupied_rooms")
         )
 
+        num_of_occupied_rooms = func.coalesce(find_occupied_rooms.c.num_of_occupied_rooms, 0)
         count_free_rooms = (
             select(
                 Room.id.label("room_id"),
-                (Room.quantity - func.coalesce(find_occupied_rooms.c.num_of_occupied_rooms, 0)).label("num_of_free_rooms")
+                (Room.quantity - num_of_occupied_rooms).label("num_of_free_rooms")
             )
             .join_from(
                 Room,
@@ -72,11 +73,12 @@ class RoomRepository(BaseRepository):
             .cte("count_free_rooms")
         )
 
-        stmt = (
+        query = (
             select(count_free_rooms)
             .where(count_free_rooms.c.num_of_free_rooms > 0)
         )
 
-        result = await self.session.execute(stmt)
+        result = await self.session.execute(query)
 
         return [res for res in result.mappings().all()]
+    
