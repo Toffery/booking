@@ -12,27 +12,6 @@ class HotelRepository(BaseRepository):
     model = Hotel
     schema = HotelInDB
 
-    async def get_all(
-            self,
-            location: str | None = None,
-            title: str | None = None,
-            limit: int = 5,
-            offset: int = 0
-    ) -> list[HotelInDB]:
-        query = select(Hotel)
-        if location:
-            location = location.strip().lower()
-            query = query.filter(func.lower(Hotel.location).contains(location))
-        if title:
-            title = title.strip().lower()
-            query = query.filter(func.lower(Hotel.title).contains(title))
-        query = (
-            query
-            .offset(offset)
-            .limit(limit)
-        )
-        result = await self.session.execute(query)
-        return [self.schema.model_validate(model) for model in result.scalars().all()]
 
     async def add(self, hotel_data: HotelCreateOrUpdate):
         stmt = insert(Hotel).values(**hotel_data.model_dump()).returning(Hotel)
@@ -59,21 +38,19 @@ class HotelRepository(BaseRepository):
             .filter(Room.id.in_(available_rooms_ids))
         )
 
-        available_hotels_ids = (
-            available_hotels_ids
+        query = select(Hotel).filter(Hotel.id.in_(available_hotels_ids))
+        if location:
+            location = location.strip().lower()
+            query = query.filter(func.lower(Hotel.location).contains(location))
+        if title:
+            title = title.strip().lower()
+            query = query.filter(func.lower(Hotel.title).contains(title))
+        query = (
+            query
             .offset(offset)
             .limit(limit)
         )
 
-        if location:
-            location = location.strip().lower()
-            # query = query.filter(func.lower(Hotel.location).contains(location))
-        if title:
-            title = title.strip().lower()
-            # query = query.filter(func.lower(Hotel.title).contains(title))
+        result = await self.session.execute(query)
+        return [self.schema.model_validate(model) for model in result.scalars().all()]
 
-        return await self.get_filtered(
-            Hotel.id.in_(available_hotels_ids),
-            func.lower(Hotel.location).contains(location if location else ""),
-            func.lower(Hotel.title).contains(title if title else ""),
-        )
