@@ -1,3 +1,6 @@
+from datetime import date
+from fastapi import Query
+
 from fastapi import APIRouter, Body
 from src.hotels.schemas import HotelCreateOrUpdate, HotelPATCH, HotelPUT
 from src.dependencies import PaginatorDep, DBDep
@@ -14,7 +17,9 @@ async def get_hotels(
         paginator: PaginatorDep,
         db: DBDep,
         location: str | None = None,
-        title: str | None = None
+        title: str | None = None,
+        date_from: date = Query(example="2024-10-18"),
+        date_to: date = Query(example="2024-10-25"),
 ):
     """
     Ручка для получения всех отелей 
@@ -22,14 +27,19 @@ async def get_hotels(
 
     Фильтрация не чувствительна к регистру.
     """
-    offset = (paginator.page - 1) * paginator.per_page
-    limit = paginator.per_page
+    # offset = (paginator.page - 1) * paginator.per_page
+    # limit = paginator.per_page
+    #
+    # return await db.hotels.get_all(
+    #     location=location,
+    #     title=title,
+    #     limit=limit,
+    #     offset=offset
+    # )
 
-    return await db.hotels.get_all(
-        location=location,
-        title=title,
-        limit=limit,
-        offset=offset
+    return await db.hotels.get_filtered_by_date(
+        date_from=date_from,
+        date_to=date_to,
     )
 
 
