@@ -43,6 +43,10 @@ class HotelRepository(BaseRepository):
             self,
             date_from: date,
             date_to: date,
+            location: str | None = None,
+            title: str | None = None,
+            limit: int = 5,
+            offset: int = 0
     ):
         available_rooms_ids = get_available_rooms_ids(
             date_from=date_from,
@@ -50,7 +54,26 @@ class HotelRepository(BaseRepository):
         )
         available_hotels_ids = (
             select(Room.hotel_id)
+            .distinct()
             .select_from(Room)
             .filter(Room.id.in_(available_rooms_ids))
         )
-        return await self.get_filtered(Hotel.id.in_(available_hotels_ids))
+
+        available_hotels_ids = (
+            available_hotels_ids
+            .offset(offset)
+            .limit(limit)
+        )
+
+        if location:
+            location = location.strip().lower()
+            # query = query.filter(func.lower(Hotel.location).contains(location))
+        if title:
+            title = title.strip().lower()
+            # query = query.filter(func.lower(Hotel.title).contains(title))
+
+        return await self.get_filtered(
+            Hotel.id.in_(available_hotels_ids),
+            func.lower(Hotel.location).contains(location if location else ""),
+            func.lower(Hotel.title).contains(title if title else ""),
+        )

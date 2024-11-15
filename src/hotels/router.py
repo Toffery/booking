@@ -27,19 +27,16 @@ async def get_hotels(
 
     Фильтрация не чувствительна к регистру.
     """
-    # offset = (paginator.page - 1) * paginator.per_page
-    # limit = paginator.per_page
-    #
-    # return await db.hotels.get_all(
-    #     location=location,
-    #     title=title,
-    #     limit=limit,
-    #     offset=offset
-    # )
+    offset = (paginator.page - 1) * paginator.per_page
+    limit = paginator.per_page
 
     return await db.hotels.get_filtered_by_date(
         date_from=date_from,
         date_to=date_to,
+        location=location,
+        title=title,
+        limit=limit,
+        offset=offset
     )
 
 
