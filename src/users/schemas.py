@@ -1,3 +1,4 @@
+import datetime
 from pydantic import BaseModel, ConfigDict, EmailStr
 
 
@@ -16,13 +17,25 @@ class UserCreate(BaseModel):
     username: str | None = None
 
 
-class UserSchema(BaseModel):
+class UserBase(BaseModel):
     id: int
     email: EmailStr
     username: str | None = None
 
-    model_config = ConfigDict(from_attributes=True)
+
+class UserOut(UserBase):
+    first_name: str | None = None
+    last_name: str | None = None
+    patronymic: str | None = None
+
+    created_at: datetime.datetime
+    updated_at: datetime.datetime
+    
+    is_admin: bool | None = None
+    is_superuser: bool | None = None
 
 
-class UserInDB(UserSchema):
+class UserInDB(UserOut):
     hashed_password: str
+
+    model_config = ConfigDict(from_attributes=True)
