@@ -9,6 +9,7 @@ from src.users.models import User
 from src.hotels.models import Hotel
 from src.rooms.models import Room
 from src.bookings.models import Booking
+from src.facilities.models import Facility, RoomsFacilities
 from src.database import Base
 from src.config import settings
 
