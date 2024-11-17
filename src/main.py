@@ -9,6 +9,7 @@ from src.hotels.router import router as router_hotels
 from src.auth.router import router as router_auth
 from src.rooms.router import router as router_rooms
 from src.bookings.router import router as router_bookings
+from src.facilities.router import router as router_facility
 
 
 app = FastAPI(title="Learning FastAPI")
@@ -17,6 +18,7 @@ app.include_router(router_auth)
 app.include_router(router_bookings)
 app.include_router(router_hotels)
 app.include_router(router_rooms)
+app.include_router(router_facility)
 
 @app.get("/")
 async def root():
