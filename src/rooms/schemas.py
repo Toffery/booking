@@ -3,9 +3,13 @@ from pydantic import BaseModel, ConfigDict, Field
 
 class RoomIn(BaseModel):
     title: str
-    description: str | None
+    description: str | None = None
     price: int
     quantity: int
+
+
+class RoomTempWithFacilities(RoomIn):
+    facilities_ids: list[int] | None = None
 
 
 class RoomCreate(RoomIn):
@@ -30,3 +34,7 @@ class RoomPATCH(BaseModel):
     description: str | None = Field(default=None)
     price: int | None = Field(default=None)
     quantity: int | None = Field(default=None)
+
+
+class RoomPatchTempWithFacilities(RoomPATCH):
+    facilities_ids: list[int] | None = Field(default=None)

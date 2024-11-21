@@ -3,8 +3,9 @@ from datetime import date
 from fastapi import APIRouter, Body, Query
 
 from src.dependencies import DBDep
-from src.rooms.schemas import RoomCreate, RoomPATCH, RoomUpdate, RoomIn
-
+from src.facilities.schemas import RoomFacilityIn, RoomFacilityCreate
+from src.rooms.schemas import RoomCreate, RoomPATCH, RoomUpdate, RoomIn, RoomTempWithFacilities, \
+    RoomPatchTempWithFacilities
 
 router = APIRouter(prefix="/hotels", tags=["Rooms"])
 
@@ -48,7 +49,7 @@ async def get_single_room(
 async def create_room(
         hotel_id: int,
         db: DBDep,
-        room_data: RoomIn = Body(
+        room_data: RoomTempWithFacilities = Body(
             openapi_examples={
             "1": {
                 "summary": "Абстрактная комната",
@@ -56,7 +57,8 @@ async def create_room(
                     "title": "Abstract room",
                     "description": "Abstract room description",
                     "price": 1000,
-                    "quantity": 2
+                    "quantity": 2,
+                    "facilities_ids": [5, 6],
                 }
             },
             "2": {
@@ -65,15 +67,18 @@ async def create_room(
                     "title": "Best Room",
                     "description": "Best Room description",
                     "price": 2000,
-                    "quantity": 3
+                    "quantity": 3,
+                    "facilities_ids": [7, 8, 9],
                 }
             }
         }
         )
 ):
     _room_data = RoomCreate(hotel_id=hotel_id, **room_data.model_dump())
-
     ret_room = await db.rooms.add(data=_room_data)
+    room_facilities = [RoomFacilityCreate(room_id=ret_room.id, facility_id=facility_id)
+                       for facility_id in room_data.facilities_ids]
+    await db.rooms_facilities.add_bulk(room_facilities)
     await db.commit()
 
     return {
@@ -90,7 +95,7 @@ async def patch_room(
         hotel_id: int,
         room_id: int,
         db: DBDep,
-        room_data: RoomPATCH = Body()
+        room_data: RoomPatchTempWithFacilities = Body()
 ):
     """
     Обновление существующей комнаты.
@@ -100,13 +105,17 @@ async def patch_room(
     воспользоваться ручкой с методом PUT 'Обновить комнату'.
     """
 
+    data = RoomPATCH(**room_data.model_dump(exclude={"facilities_ids"}))
     ret_room = await db.rooms.edit(
-        data=room_data,
+        data=data,
         id=room_id,
         hotel_id=hotel_id,
         exclude_unset=True
     )
-    await db.commit()
+    existing_facilities = await db.rooms_facilities.get_filtered(room_id=room_id)
+    existing_facilities_ids = [f.facility_id for f in existing_facilities]
+    print(existing_facilities_ids)
+    # await db.commit()
 
     return {
         "message": "Room updated",
