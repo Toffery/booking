@@ -107,7 +107,7 @@ async def patch_room(
     """
     is_return_data = False
     data = RoomPatch(**room_data.model_dump(exclude_unset=True))
-    print("data:", list(data.model_dump().values()))
+
     if any(val is not None for val in data.model_dump().values()):
         is_return_data = True
         ret_room = await db.rooms.edit(
@@ -116,7 +116,7 @@ async def patch_room(
             hotel_id=hotel_id,
             exclude_unset=True
         )
-    await db.rooms_facilities.update_or_delete(room_data, room_id)
+    await db.rooms_facilities.update(room_data, room_id)
     
     await db.commit()
 
@@ -151,7 +151,7 @@ async def update_room(
         exclude_unset=False
     )
 
-    await db.rooms_facilities.update_or_delete(room_data, room_id)
+    await db.rooms_facilities.update(room_data, room_id)
         
     await db.commit()
 

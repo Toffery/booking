@@ -1,4 +1,6 @@
 from pydantic import BaseModel
+from sqlalchemy import delete
+
 from src.repositories.baserepo import BaseRepository
 from src.facilities.models import Facility, RoomsFacilities
 from src.facilities.schemas import FacilityInDB, RoomFacilityCreate, RoomFacilityInDB
@@ -13,7 +15,7 @@ class RoomFacilityRepository(BaseRepository):
     model = RoomsFacilities
     schema = RoomFacilityInDB
 
-    async def update_or_delete(self, room_data: BaseModel, room_id: int):
+    async def update(self, room_data: BaseModel, room_id: int):
         existing_facilities = await self.get_filtered(room_id=room_id)
         existing_facilities_ids = [f.facility_id for f in existing_facilities]
 
@@ -22,12 +24,16 @@ class RoomFacilityRepository(BaseRepository):
         facilities_ids_to_remove = [f_id for f_id in existing_facilities_ids
                                     if f_id not in room_data.facilities_ids]
 
-        for f_id in facilities_ids_to_add:
-            room_facility_create = RoomFacilityCreate(
-                room_id=room_id,
-                facility_id=f_id,
+        if facilities_ids_to_add:
+            rooms_facilities_to_add = [RoomFacilityCreate(room_id=room_id, facility_id=f_id)
+                                   for f_id in facilities_ids_to_add]
+            await self.add_bulk(rooms_facilities_to_add)
+        if facilities_ids_to_remove:
+            stmt = (
+                delete(self.model)
+                .filter(
+                    self.model.room_id == room_id,
+                    self.model.facility_id.in_(facilities_ids_to_remove)
+                )
             )
-            await self.add(room_facility_create)
-        for f_id in facilities_ids_to_remove:
-            await self.delete(room_id=room_id, facility_id=f_id)
-    
+            await self.session.execute(stmt)
