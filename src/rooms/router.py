@@ -1,11 +1,12 @@
 from datetime import date
 
-from fastapi import APIRouter, Body, Query
+from fastapi import APIRouter, Body
 
 from src.dependencies import DBDep
-from src.facilities.schemas import RoomFacilityIn, RoomFacilityCreate
-from src.rooms.schemas import RoomCreate, RoomPATCH, RoomUpdate, RoomIn, RoomTempWithFacilities, \
-    RoomPatchTempWithFacilities, RoomUpdateTempWithFacilities
+from src.facilities.schemas import RoomFacilityCreate
+from src.rooms.schemas import RoomCreate, RoomUpdate, RoomPatch
+from src.rooms.schemas import RoomIn, RoomUpdateIn, RoomPatchIn
+
 
 router = APIRouter(prefix="/hotels", tags=["Rooms"])
 
@@ -49,7 +50,7 @@ async def get_single_room(
 async def create_room(
         hotel_id: int,
         db: DBDep,
-        room_data: RoomTempWithFacilities = Body(
+        room_data: RoomIn = Body(
             openapi_examples={
             "1": {
                 "summary": "Абстрактная комната",
@@ -95,7 +96,7 @@ async def patch_room(
         hotel_id: int,
         room_id: int,
         db: DBDep,
-        room_data: RoomPatchTempWithFacilities = Body()
+        room_data: RoomPatchIn = Body()
 ):
     """
     Обновление существующей комнаты.
@@ -104,21 +105,24 @@ async def patch_room(
     так и полностью, но для полного обновления лучше 
     воспользоваться ручкой с методом PUT 'Обновить комнату'.
     """
-
-    data = RoomPATCH(**room_data.model_dump(exclude_unset=True))
-    ret_room = await db.rooms.edit(
-        data=data,
-        id=room_id,
-        hotel_id=hotel_id,
-        exclude_unset=True
-    )
+    is_return_data = False
+    data = RoomPatch(**room_data.model_dump(exclude_unset=True))
+    print("data:", list(data.model_dump().values()))
+    if any(val is not None for val in data.model_dump().values()):
+        is_return_data = True
+        ret_room = await db.rooms.edit(
+            data=data,
+            id=room_id,
+            hotel_id=hotel_id,
+            exclude_unset=True
+        )
     await db.rooms_facilities.update_or_delete(room_data, room_id)
     
     await db.commit()
 
     return {
         "message": "Room updated",
-        "data": ret_room
+        "data": ret_room if is_return_data else None
     }
 
 
@@ -130,7 +134,7 @@ async def update_room(
         hotel_id: int,
         room_id: int,
         db: DBDep,
-        room_data: RoomUpdateTempWithFacilities = Body()
+        room_data: RoomUpdateIn = Body()
 ):
     """
     Обновление существующей комнаты.

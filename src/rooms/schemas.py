@@ -1,18 +1,18 @@
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class RoomIn(BaseModel):
+class RoomBase(BaseModel):
     title: str
     description: str | None = None
     price: int
     quantity: int
 
 
-class RoomTempWithFacilities(RoomIn):
+class RoomIn(RoomBase):
     facilities_ids: list[int] | None = None
 
 
-class RoomCreate(RoomIn):
+class RoomCreate(RoomBase):
     hotel_id: int
 
 
@@ -24,19 +24,21 @@ class RoomInDB(RoomCreate):
 
 class RoomUpdate(BaseModel):
     title: str
-    description: str | None
+    description: str | None = None
     price: int
     quantity: int
 
-class RoomUpdateTempWithFacilities(RoomUpdate):
+
+class RoomUpdateIn(RoomUpdate):
     facilities_ids: list[int] | None = Field(default=None)
 
-class RoomPATCH(BaseModel):
+
+class RoomPatch(BaseModel):
     title: str | None = Field(default=None)
     description: str | None = Field(default=None)
     price: int | None = Field(default=None)
     quantity: int | None = Field(default=None)
 
 
-class RoomPatchTempWithFacilities(RoomPATCH):
+class RoomPatchIn(RoomPatch):
     facilities_ids: list[int] | None = Field(default=None)
