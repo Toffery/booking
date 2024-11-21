@@ -28,6 +28,8 @@ class RoomUpdate(BaseModel):
     price: int
     quantity: int
 
+class RoomUpdateTempWithFacilities(RoomUpdate):
+    facilities_ids: list[int] | None = Field(default=None)
 
 class RoomPATCH(BaseModel):
     title: str | None = Field(default=None)

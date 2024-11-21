@@ -5,7 +5,7 @@ from fastapi import APIRouter, Body, Query
 from src.dependencies import DBDep
 from src.facilities.schemas import RoomFacilityIn, RoomFacilityCreate
 from src.rooms.schemas import RoomCreate, RoomPATCH, RoomUpdate, RoomIn, RoomTempWithFacilities, \
-    RoomPatchTempWithFacilities
+    RoomPatchTempWithFacilities, RoomUpdateTempWithFacilities
 
 router = APIRouter(prefix="/hotels", tags=["Rooms"])
 
@@ -105,17 +105,16 @@ async def patch_room(
     воспользоваться ручкой с методом PUT 'Обновить комнату'.
     """
 
-    data = RoomPATCH(**room_data.model_dump(exclude={"facilities_ids"}))
+    data = RoomPATCH(**room_data.model_dump(exclude_unset=True))
     ret_room = await db.rooms.edit(
         data=data,
         id=room_id,
         hotel_id=hotel_id,
         exclude_unset=True
     )
-    existing_facilities = await db.rooms_facilities.get_filtered(room_id=room_id)
-    existing_facilities_ids = [f.facility_id for f in existing_facilities]
-    print(existing_facilities_ids)
-    # await db.commit()
+    await db.rooms_facilities.update_or_delete(room_data, room_id)
+    
+    await db.commit()
 
     return {
         "message": "Room updated",
@@ -131,7 +130,7 @@ async def update_room(
         hotel_id: int,
         room_id: int,
         db: DBDep,
-        room_data: RoomUpdate = Body()
+        room_data: RoomUpdateTempWithFacilities = Body()
 ):
     """
     Обновление существующей комнаты.
@@ -140,12 +139,16 @@ async def update_room(
     так и полностью, но для полного обновления лучше 
     воспользоваться ручкой с методом PUT 'Обновить комнату'.
     """
+    data = RoomUpdate(**room_data.model_dump(exclude={"facilities_ids"}))
     ret_room = await db.rooms.edit(
-        data=room_data,
+        data=data,
         id=room_id,
         hotel_id=hotel_id,
         exclude_unset=False
     )
+
+    await db.rooms_facilities.update_or_delete(room_data, room_id)
+        
     await db.commit()
 
     return {
