@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from sqlalchemy import delete
 
 from src.repositories.baserepo import BaseRepository
-from src.facilities.models import Facility, RoomsFacilities
+from src.facilities.models import Facility, RoomFacility
 from src.facilities.schemas import FacilityInDB, RoomFacilityCreate, RoomFacilityInDB
 
 
@@ -12,7 +12,7 @@ class FacilityRepository(BaseRepository):
 
 
 class RoomFacilityRepository(BaseRepository):
-    model = RoomsFacilities
+    model = RoomFacility
     schema = RoomFacilityInDB
 
     async def update(self, room_data: BaseModel, room_id: int):

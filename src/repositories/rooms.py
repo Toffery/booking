@@ -1,8 +1,9 @@
 from datetime import date
 
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
-from src.rooms.schemas import RoomInDB
+from src.rooms.schemas import RoomInDB, RoomWithFacilities
 from src.rooms.models import Room
 from src.repositories.baserepo import BaseRepository
 from src.repositories.utils import get_available_rooms_ids
@@ -21,6 +22,18 @@ class RoomRepository(BaseRepository):
         result = await self.session.execute(query)
         return [self.schema.model_validate(model) for model in result.scalars().all()]
 
+    async def get_one_or_none(self, **filter_by):
+        query = (
+            select(self.model)
+            .options(selectinload(self.model.facilities))
+            .filter_by(**filter_by)
+        )
+        result = await self.session.execute(query)
+        model = result.scalars().one_or_none()
+        if result is None:
+            return None
+        return RoomWithFacilities.model_validate(model)
+
     async def get_filtered_by_date(
             self,
             hotel_id: int,
@@ -30,11 +43,16 @@ class RoomRepository(BaseRepository):
         """
             Возвращаем СВОБОДНЫЕ номера для отеля {hotel_id} в период {date_from} - {date_to}
         """
-
         available_rooms_ids = get_available_rooms_ids(
             date_from=date_from,
             date_to=date_to,
             hotel_id=hotel_id,
         )
 
-        return await self.get_filtered(Room.id.in_(available_rooms_ids))
+        stmt = (
+            select(self.model)
+            .options(selectinload(self.model.facilities))
+            .filter(self.model.id.in_(available_rooms_ids))
+        )
+        result = await self.session.execute(stmt)
+        return [RoomWithFacilities.model_validate(model) for model in result.scalars().all()]

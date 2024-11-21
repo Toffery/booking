@@ -1,5 +1,7 @@
 from pydantic import BaseModel, ConfigDict, Field
 
+from src.facilities.schemas import FacilityInDB
+
 
 class RoomBase(BaseModel):
     title: str
@@ -20,6 +22,10 @@ class RoomInDB(RoomCreate):
     id: int
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class RoomWithFacilities(RoomInDB):
+    facilities: list["FacilityInDB"]
 
 
 class RoomUpdate(BaseModel):
