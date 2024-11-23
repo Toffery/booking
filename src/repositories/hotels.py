@@ -4,13 +4,14 @@ from sqlalchemy import func, insert, select
 from src.hotels.schemas import HotelInDB, HotelCreateOrUpdate
 from src.hotels.models import Hotel
 from src.repositories.baserepo import BaseRepository
+from src.repositories.mappers.mappers import HotelDataMapper
 from src.repositories.utils import get_available_rooms_ids
 from src.rooms.models import Room
 
 
 class HotelRepository(BaseRepository):
     model = Hotel
-    schema = HotelInDB
+    mapper = HotelDataMapper
 
 
     async def add(self, hotel_data: HotelCreateOrUpdate):
@@ -52,5 +53,5 @@ class HotelRepository(BaseRepository):
         )
 
         result = await self.session.execute(query)
-        return [self.schema.model_validate(model) for model in result.scalars().all()]
+        return [self.mapper.map_to_domain_entity(model) for model in result.scalars().all()]
 

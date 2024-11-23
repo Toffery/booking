@@ -1,4 +1,6 @@
 from sqlalchemy import select
+
+from src.repositories.mappers.mappers import UserDataMapper
 from src.users.models import User
 from src.users.schemas import UserInDB
 from src.repositories.baserepo import BaseRepository
@@ -6,7 +8,7 @@ from src.repositories.baserepo import BaseRepository
 
 class AuthRepository(BaseRepository):
     model = User
-    schema = UserInDB
+    mapper = UserDataMapper
 
     async def get_user_in_db(
             self, 
@@ -23,4 +25,4 @@ class AuthRepository(BaseRepository):
         result = await self.session.execute(query)
         user = result.scalars().one()
 
-        return UserInDB.model_validate(user)
+        return self.mapper.map_to_domain_entity(user)
