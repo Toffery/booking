@@ -17,7 +17,7 @@ DBDep = Annotated[DBManager, Depends(get_db)]
 
 class PaginatorParams(BaseModel):
     page: Annotated[int | None, Query(default=1, ge=1)]
-    per_page: Annotated[int | None, Query(default=5, ge=1, le=30)]
+    per_page: Annotated[int | None, Query(default=30, ge=1, le=100)]
 
 
 PaginatorDep = Annotated[PaginatorParams, Depends()]

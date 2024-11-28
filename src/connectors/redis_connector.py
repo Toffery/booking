@@ -1,5 +1,7 @@
 import redis.asyncio as redis
 
+from src.config import settings
+
 class RedisConnector:
     def __init__(self, host: str, port: int):
         self.host = host
@@ -24,3 +26,4 @@ class RedisConnector:
     async def close(self):
         if self.redis:
             await self.redis.aclose()
+
