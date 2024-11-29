@@ -4,7 +4,8 @@ from fastapi import APIRouter
 from src.core.redis_cache_decorator import redis_cache
 from src.dependencies import PaginatorDep, DBDep
 from src.facilities.schemas import FacilityIn
-from src.core.setup import redis_manager
+# from src.core.setup import redis_manager
+from src.core.redis_cache_decorator import redis_cache
 
 router = APIRouter(prefix="/facilities", tags=["Facilities"])
 
@@ -19,42 +20,19 @@ async def get_facilities(
     offset = (paginator.page - 1) * paginator.per_page
     limit = paginator.per_page
 
-    cached_facilities = await redis_manager.get(f"facilities:{offset}:{limit}")
-    if cached_facilities:
-        return json.loads(cached_facilities)
-    else:
-        facilities_objs = await db.facilities.get_all(
-            limit=limit,
-            offset=offset
-        )
-        dumped_facilities = json.dumps([f.model_dump() for f in facilities_objs])
-        await redis_manager.set(
-            key=f"facilities:{offset}:{limit}",
-            value=dumped_facilities,
-            exp=FACILITY_CACHE_EXP,
-        )
-        return facilities_objs
-
+    return await db.facilities.get_all(
+        limit=limit,
+        offset=offset
+    )
 
 @router.get("/{facility_id}")
+@redis_cache(exp=FACILITY_CACHE_EXP)
 async def get_single_facility(
         facility_id: int,
         db: DBDep
 ):
-    cached_facility = await redis_manager.get(f"facility_{facility_id}")
-    if cached_facility:
-        cached_facility = json.loads(cached_facility)
-        return cached_facility
-    else:
-        facility_obj = await db.facilities.get_one_or_none(id=facility_id)
-        dumped_facility = json.dumps(facility_obj.model_dump())
-        await redis_manager.set(
-            key=f"facility_{facility_id}", 
-            value=dumped_facility,
-            exp=FACILITY_CACHE_EXP,
-        )
-        return facility_obj
-
+    return await db.facilities.get_one_or_none(id=facility_id)
+    
 @router.post("/")
 async def create_facility(
         db: DBDep,
