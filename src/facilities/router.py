@@ -1,5 +1,7 @@
 import json
 from fastapi import APIRouter
+
+from src.core.redis_cache_decorator import redis_cache
 from src.dependencies import PaginatorDep, DBDep
 from src.facilities.schemas import FacilityIn
 from src.core.setup import redis_manager
@@ -9,6 +11,7 @@ router = APIRouter(prefix="/facilities", tags=["Facilities"])
 FACILITY_CACHE_EXP = 60
 
 @router.get("/")
+@redis_cache(exp=10)
 async def get_facilities(
         paginator: PaginatorDep,
         db: DBDep,
