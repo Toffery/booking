@@ -14,16 +14,9 @@ FACILITY_CACHE_EXP = 60
 @router.get("/")
 @redis_cache(exp=10)
 async def get_facilities(
-        paginator: PaginatorDep,
         db: DBDep,
 ):
-    offset = (paginator.page - 1) * paginator.per_page
-    limit = paginator.per_page
-
-    return await db.facilities.get_all(
-        limit=limit,
-        offset=offset
-    )
+    return await db.facilities.get_all()
 
 @router.get("/{facility_id}")
 @redis_cache(exp=FACILITY_CACHE_EXP)

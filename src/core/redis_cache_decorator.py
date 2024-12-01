@@ -1,7 +1,5 @@
 import functools
 import json
-import sys
-from pathlib import Path
 
 from pydantic import BaseModel
 
@@ -23,6 +21,7 @@ def redis_cache(exp: int):
                 print("Getting res from cache")
                 return json.loads(cached_result)
             else:
+                print(*args)
                 results_from_db = await func(*args, **kwargs)
                 if isinstance(results_from_db, list):
                     dumped = json.dumps([res.model_dump() for res in results_from_db])
@@ -33,6 +32,6 @@ def redis_cache(exp: int):
                     value=dumped,
                     exp=exp
                 )
-                return results_from_db        
+                return results_from_db
         return inner
     return wrapper
