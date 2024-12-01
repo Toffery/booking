@@ -1,25 +1,25 @@
-import json
 from fastapi import APIRouter
 
-from src.core.redis_cache_decorator import redis_cache
-from src.dependencies import PaginatorDep, DBDep
+from src.dependencies import DBDep
 from src.facilities.schemas import FacilityIn
-# from src.core.setup import redis_manager
 from src.core.redis_cache_decorator import redis_cache
+
+from fastapi_cache.decorator import cache
+
 
 router = APIRouter(prefix="/facilities", tags=["Facilities"])
 
 FACILITY_CACHE_EXP = 60
 
 @router.get("/")
-@redis_cache(exp=10)
+@cache(expire=10)
 async def get_facilities(
         db: DBDep,
 ):
     return await db.facilities.get_all()
 
 @router.get("/{facility_id}")
-@redis_cache(exp=FACILITY_CACHE_EXP)
+@cache(expire=FACILITY_CACHE_EXP)
 async def get_single_facility(
         facility_id: int,
         db: DBDep
