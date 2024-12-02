@@ -11,6 +11,7 @@ from src.auth.router import router as router_auth
 from src.rooms.router import router as router_rooms
 from src.bookings.router import router as router_bookings
 from src.facilities.router import router as router_facility
+from src.images.router import router as router_images
 from src.core.setup import redis_manager
 
 from fastapi_cache import FastAPICache
@@ -33,6 +34,7 @@ app.include_router(router_bookings)
 app.include_router(router_hotels)
 app.include_router(router_rooms)
 app.include_router(router_facility)
+app.include_router(router_images)
 
 @app.get("/")
 async def root():

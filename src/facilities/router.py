@@ -2,11 +2,8 @@ from fastapi import APIRouter
 
 from src.dependencies import DBDep
 from src.facilities.schemas import FacilityIn
-from src.core.redis_cache_decorator import redis_cache
 
 from fastapi_cache.decorator import cache
-
-from src.core.tasks.tasks import test
 
 
 router = APIRouter(prefix="/facilities", tags=["Facilities"])
@@ -35,8 +32,6 @@ async def create_facility(
 ):
     ret_data = await db.facilities.add(facility_data)
     await db.commit()
-
-    test.delay()
 
     return {
         "message": "Facility created",
