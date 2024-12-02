@@ -17,6 +17,7 @@ def upload_image(
 
     resize_and_save_image.delay(image_path)
 
+
     return {
         "filename": file.filename
     }
