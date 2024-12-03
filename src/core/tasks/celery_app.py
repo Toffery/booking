@@ -1,4 +1,5 @@
 from celery import Celery
+from celery.schedules import crontab
 
 from src.config import settings
 
@@ -13,6 +14,6 @@ celery_instance = Celery(
 celery_instance.conf.beat_schedule = {
     "send_emails_to_users_with_today_checkin": {
         "task": "booking_today_checkin",
-        "schedule": 60,
+        "schedule": crontab("0", "7"),
     }
 }

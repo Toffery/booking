@@ -1,5 +1,7 @@
 import asyncio
 
+from pydantic import EmailStr
+
 from src.core.tasks.celery_app import celery_instance
 
 from PIL import Image
@@ -57,3 +59,9 @@ async def get_booking_with_today_checkin_helper():
 @celery_instance.task(name="booking_today_checkin")
 def send_emails_to_users_with_today_checkin():
     asyncio.run(get_booking_with_today_checkin_helper())
+
+
+@celery_instance.task()
+def send_email_notification_on_booking_creation(email: EmailStr):
+    with open("log.txt", "a") as log:
+        log.write(f"email sent to {email}")

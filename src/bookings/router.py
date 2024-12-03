@@ -4,6 +4,8 @@ from src.auth.dependencies import GetUserIdDep
 from src.bookings.schemas import BookingCreate, BookingIn
 from src.dependencies import DBDep, PaginatorDep
 
+from src.core.tasks.tasks import send_email_notification_on_booking_creation
+
 router = APIRouter(prefix="/bookings", tags=["Бронирования"])
 
 
@@ -49,6 +51,9 @@ async def create_booking(
     ret_booking = await db.bookings.add(data=_booking_data)
     await db.commit()
 
+    user = await db.auth.get_one_or_none(id=user_id)
+
+    send_email_notification_on_booking_creation.delay(user.email)
 
     return {
         "message": "Booking created",
