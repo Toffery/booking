@@ -14,21 +14,19 @@ REFRESH_TOKEN_EXPIRE_MINUTES = auth_settings.REFRESH_TOKEN_EXP
 
 
 class AuthService:
-
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
     def verify_password(self, plain_password, hashed_password):
         return self.pwd_context.verify(plain_password, hashed_password)
-
 
     def get_password_hash(self, password):
         return self.pwd_context.hash(password)
 
-
+    @staticmethod
     def create_access_token(
-            self, 
             data: dict, 
-            expires_delta: int | None = None
-        ):
+            expires_delta: timedelta | None = None
+    ) -> str:
         to_encode = data.copy()
         
         if expires_delta:
@@ -41,8 +39,8 @@ class AuthService:
         
         return encoded_jwt
 
-    
-    def decode_access_token(self, token: str) -> dict[str, str]:
+    @staticmethod
+    def decode_access_token(token: str) -> dict[str, str]:
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
             return payload
