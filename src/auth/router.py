@@ -8,7 +8,7 @@ from src.dependencies import DBDep
 from src.users.schemas import UserIn, UserCreate, UserInDB, UserOut
 
 
-router= APIRouter(prefix="/auth", tags=["Auth"])
+router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
 @router.post("/signup")

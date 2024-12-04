@@ -18,8 +18,8 @@ async def get_hotels(
         db: DBDep,
         location: str | None = None,
         title: str | None = None,
-        date_from: date = Query(example="2024-10-18"),
-        date_to: date = Query(example="2024-10-25"),
+        date_from: date = Query(examples=["2024-10-18"]),
+        date_to: date = Query(examples=["2024-10-25"]),
 ):
     """
     Ручка для получения всех отелей 
