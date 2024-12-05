@@ -77,9 +77,10 @@ async def create_room(
 ):
     _room_data = RoomCreate(hotel_id=hotel_id, **room_data.model_dump())
     ret_room = await db.rooms.add(data=_room_data)
-    room_facilities = [RoomFacilityCreate(room_id=ret_room.id, facility_id=facility_id)
-                       for facility_id in room_data.facilities_ids]
-    await db.rooms_facilities.add_bulk(room_facilities)
+    if room_data.facilities_ids:
+        room_facilities = [RoomFacilityCreate(room_id=ret_room.id, facility_id=facility_id)
+                           for facility_id in room_data.facilities_ids]
+        await db.rooms_facilities.add_bulk(room_facilities)
     await db.commit()
 
     return {
