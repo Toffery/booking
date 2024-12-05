@@ -1,6 +1,4 @@
-from src.database import async_session_maker_null_pool
 from src.hotels.schemas import HotelCreateOrUpdate
-from src.utils.db_manager import DBManager
 
 
 async def test_create_hotel(db):

@@ -3,7 +3,6 @@ from httpx import AsyncClient, ASGITransport
 
 from src.config import settings
 from src.database import Base, engine_null_pool, async_session_maker_null_pool
-import httpx
 import json
 
 from src.main import app
@@ -57,9 +56,6 @@ async def insert_hotels_and_rooms(setup_database, ac):
             json=room
         )
         assert response.status_code == 200, ("Failed to add rooms in db", response.status_code, response.text)
-
-
-
 
 
 @pytest.fixture(
