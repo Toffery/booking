@@ -5,6 +5,7 @@ from src.config import settings
 from src.database import Base, engine_null_pool, async_session_maker_null_pool
 import json
 
+from src.dependencies import get_db
 from src.main import app
 from src.utils.db_manager import DBManager
 
@@ -15,6 +16,13 @@ from src.utils.db_manager import DBManager
 async def db() -> DBManager:
     async with DBManager(session_factory=async_session_maker_null_pool) as db:
         yield db
+
+
+async def get_db_null_pool():
+    async with DBManager(session_factory=async_session_maker_null_pool) as db:
+        yield db
+
+app.dependency_overrides[get_db] = get_db_null_pool
 
 
 @pytest.fixture(

@@ -10,15 +10,17 @@ router = APIRouter(prefix="/facilities", tags=["Facilities"])
 
 FACILITY_CACHE_EXP = 60
 
-@router.get("/")
+
 @cache(expire=10)
+@router.get("/")
 async def get_facilities(
         db: DBDep,
 ):
     return await db.facilities.get_all()
 
-@router.get("/{facility_id}")
+
 @cache(expire=FACILITY_CACHE_EXP)
+@router.get("/{facility_id}")
 async def get_single_facility(
         facility_id: int,
         db: DBDep
