@@ -47,6 +47,4 @@ async def test_booking_crud(db):
     await db.commit()
 
     ret_booking_after_delete = await db.bookings.get_one_or_none(id=ret_booking.id)
-    print(f"{ret_booking_after_delete=}")
     assert ret_booking_after_delete is None, "Booking wasn't deleted"
-

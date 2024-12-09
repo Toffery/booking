@@ -10,11 +10,11 @@ from src.dependencies import PaginatorDep, DBDep
 router = APIRouter(prefix="/hotels", tags=["Hotels"])
 
 
-@cache(expire=60)
 @router.get(
-    "/", 
+    "/",
     summary="Получить все отели"
 )
+@cache(expire=60)
 async def get_hotels(
         paginator: PaginatorDep,
         db: DBDep,
@@ -53,6 +53,7 @@ async def get_hotel_by_id(
 ):
     return await db.hotels.get_one_or_none(id=hotel_id)
 
+
 @router.post(
     "/",
     summary="Создать отель",
@@ -87,6 +88,7 @@ async def create_hotel(
         "data": ret_hotel.scalars().all()
     }
 
+
 @router.put(
     "/{hotel_id}",
     summary="Обновить отель",
@@ -107,6 +109,7 @@ async def update_hotel(
         "message": "Hotel updated",
         "data": ret_hotel
     }
+
 
 @router.patch(
     "/{hotel_id}",
@@ -131,6 +134,7 @@ async def patch_hotel(
         "message": "Hotel updated",
         "data": ret_hotel
     }
+
 
 @router.delete(
     "/{hotel_id}",

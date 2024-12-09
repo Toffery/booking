@@ -9,3 +9,4 @@ async def test_add_facility(ac):
         json={"title": "test_facility"}
     )
     assert response.status_code == 200
+    assert response.json()["data"]["title"] == "test_facility"

@@ -11,22 +11,23 @@ router = APIRouter(prefix="/facilities", tags=["Facilities"])
 FACILITY_CACHE_EXP = 60
 
 
-@cache(expire=10)
 @router.get("/")
+@cache(expire=10)
 async def get_facilities(
         db: DBDep,
 ):
     return await db.facilities.get_all()
 
 
-@cache(expire=FACILITY_CACHE_EXP)
 @router.get("/{facility_id}")
+@cache(expire=FACILITY_CACHE_EXP)
 async def get_single_facility(
         facility_id: int,
         db: DBDep
 ):
     return await db.facilities.get_one_or_none(id=facility_id)
-    
+
+
 @router.post("/")
 async def create_facility(
         db: DBDep,
@@ -39,6 +40,7 @@ async def create_facility(
         "message": "Facility created",
         "data": ret_data
     }
+
 
 @router.post("/{facility_id}")
 async def update_facility(
@@ -56,6 +58,7 @@ async def update_facility(
         "message": "Facility updated",
         "data": ret_data
     }
+
 
 @router.delete("/{facility_id}")
 async def delete_facility(
