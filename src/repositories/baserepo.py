@@ -10,10 +10,8 @@ class BaseRepository:
     model: Base = None
     mapper: DataMapper = None
 
-
     def __init__(self, session: Session) -> None:
         self.session = session
-
 
     async def get_filtered(self, *filters, **filter_by):
         query = (
@@ -25,10 +23,8 @@ class BaseRepository:
 
         return [self.mapper.map_to_domain_entity(model) for model in result.scalars().all()]
 
-
     async def get_all(self, *args, **kwargs):
         return await self.get_filtered()
-
 
     async def get_one_or_none(self, **filter_by):
         query = select(self.model).filter_by(**filter_by)
@@ -39,7 +35,6 @@ class BaseRepository:
         if model is None:
             return None
         return self.mapper.map_to_domain_entity(model)
-
 
     async def add(self, data: BaseModel):
         stmt = (
@@ -67,9 +62,11 @@ class BaseRepository:
         )
         result = await self.session.execute(stmt)
         return result.scalars().one()
-    
 
     async def delete(self, **filter_by):
         stmt = delete(self.model).filter_by(**filter_by).returning(self.model)
         result = await self.session.execute(stmt)
         return result.scalars().one()
+
+    async def delete_all_rows(self):
+        await self.session.execute(delete(self.model))

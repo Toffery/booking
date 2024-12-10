@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from src.auth.dependencies import GetUserIdDep
 from src.bookings.schemas import BookingCreate, BookingIn
@@ -49,11 +49,10 @@ async def create_booking(
         price=room.price*(booking_in.date_to - booking_in.date_from).days
     )
     # ret_booking = await db.bookings.add(data=_booking_data)
-    try:
-        ret_booking = await db.bookings.add_booking(booking_data=_booking_data)
-        await db.commit()
-    except:
-        return {"OOOOPS"}
+
+    ret_booking = await db.bookings.add_booking(booking_data=_booking_data)
+    await db.commit()
+
     user = await db.auth.get_one_or_none(id=user_id)
 
     send_email_notification_on_booking_creation.delay(user.email)

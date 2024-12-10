@@ -65,12 +65,11 @@ def get_available_rooms_ids(
             room_ids_of_hotel.filter_by(hotel_id=hotel_id)
         )
     room_ids_of_hotel = room_ids_of_hotel.subquery()
-
     available_rooms_ids = (
         select(count_free_rooms.c.room_id)
         .select_from(count_free_rooms)
         .filter(count_free_rooms.c.num_of_free_rooms > 0,
-                count_free_rooms.c.room_id.in_(room_ids_of_hotel))
+                count_free_rooms.c.room_id.in_(room_ids_of_hotel.element))
     )
 
     return available_rooms_ids

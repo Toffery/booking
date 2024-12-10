@@ -7,6 +7,3 @@ async def test_get_hotels(ac):
         }
     )
     assert response.status_code == 200
-
-
-
