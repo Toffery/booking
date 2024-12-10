@@ -1,10 +1,14 @@
 from datetime import date
 
-from sqlalchemy import select
+from sqlalchemy import select, insert
 
+from src.bookings.schemas import BookingCreate
 from src.repositories.baserepo import BaseRepository
 from src.bookings.models import Booking
 from src.repositories.mappers.mappers import BookingDataMapper
+from src.repositories.utils import get_available_rooms_ids
+from src.rooms.models import Room
+from src.rooms.schemas import RoomInDB
 
 
 class BookingRepository(BaseRepository):
@@ -18,3 +22,23 @@ class BookingRepository(BaseRepository):
         )
         res = await self.session.execute(query)
         return [self.mapper.map_to_domain_entity(booking) for booking in res.scalars().all()]
+
+    async def add_booking(self, booking_data: BookingCreate):
+        hotel_id_query = (
+            select(Room.hotel_id)
+            .filter(Room.id == booking_data.room_id)
+        )
+        result = await self.session.execute(hotel_id_query)
+        hotel_id = result.scalars().one()
+        available_rooms_ids = get_available_rooms_ids(
+            date_from=booking_data.date_from,
+            date_to=booking_data.date_to,
+            hotel_id=hotel_id,
+        )
+        available_rooms_ids = await self.session.execute(available_rooms_ids)
+        available_rooms_ids = [room for room in available_rooms_ids.scalars().all()]
+        print(available_rooms_ids)
+        if booking_data.room_id in available_rooms_ids:
+            return await self.add(booking_data)
+        else:
+            raise Exception("No rooms available")

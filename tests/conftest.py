@@ -85,19 +85,20 @@ async def add_user(setup_database, ac):
 
 
 @pytest.fixture(
-    scope="session",
-    autouse=True
+    scope="session"
 )
 async def authenticated_ac(add_user, ac):
-    response = await ac.post(
-        "/auth/login",
-        json={
-            "email": "test@ya.ru",
-            "password": "test",
-        },
-    )
-    assert response.status_code == 200
-    token = response.json()["access_token"]
-
-    ac.cookies = {"access_token": token}
-    yield ac
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as new_ac:
+        response = await ac.post(
+            "/auth/login",
+            json={
+                "email": "test@ya.ru",
+                "password": "test",
+            },
+        )
+        assert response.status_code == 200
+        assert response.json()["access_token"], ("Access token not found", response.status_code, response.text)
+        new_ac.cookies = {
+            "access_token": response.json()["access_token"]
+        }
+        yield new_ac

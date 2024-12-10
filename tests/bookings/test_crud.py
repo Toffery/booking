@@ -1,7 +1,6 @@
 from datetime import date
 
-from src.bookings.schemas import BookingCreate, BookingIn
-from src.hotels.schemas import HotelCreateOrUpdate
+from src.bookings.schemas import BookingCreate
 from src.rooms.schemas import RoomInDB
 from src.users.schemas import UserInDB
 
