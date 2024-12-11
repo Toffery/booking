@@ -1,6 +1,13 @@
+import asyncio
 from datetime import date
 
 import pytest
+
+
+@pytest.fixture(scope="session")
+async def delete_all_bookings(ac):
+    response = await ac.delete("/bookings/delete_all")
+    assert response.status_code == 200
 
 
 @pytest.mark.parametrize(
@@ -12,6 +19,7 @@ import pytest
         (1, "2024-11-18", "2024-11-25", 24500, 200),
     ]
 )
+@pytest.mark.usefixtures("delete_all_bookings")
 async def test_create_booking(
         room_id,
         date_from,
@@ -19,7 +27,8 @@ async def test_create_booking(
         price,
         status_code,
         authenticated_ac,
-        db
+        db,
+        delete_all_bookings,
 ):
     response = await authenticated_ac.post(
         "/bookings/",
@@ -58,10 +67,32 @@ async def test_get_my_bookings(authenticated_ac):
     assert response.status_code == 200
 
 
-@pytest.fixture(scope="session")
-async def delete_bookings(ac, db):
-    await db.bookings.delete_all_rows()
+@pytest.mark.parametrize(
+    "room_id, date_from, date_to, price, status_code, num_of_bookings",
+    [
+        (1, "2024-10-18", "2024-10-25", 24500, 200, 1),
+        (1, "2024-10-18", "2024-10-25", 24500, 200, 2)
+    ]
+)
+async def test_add_and_get_my_bookings(
+        room_id,
+        date_from,
+        date_to,
+        price,
+        status_code,
+        num_of_bookings,
+        authenticated_ac
+):
+    response = await authenticated_ac.post(
+        "/bookings/",
+        json={
+            "room_id": room_id,
+            "date_from": date_from,
+            "date_to": date_to,
+        }
+    )
+    assert response.status_code == status_code, response.json()
 
-
-async def test_add_and_get_my_bookings(delete_bookings):
-    pass
+    my_bookings = await authenticated_ac.get("/bookings/me")
+    assert my_bookings.status_code == 200
+    assert len(my_bookings.json()) == num_of_bookings

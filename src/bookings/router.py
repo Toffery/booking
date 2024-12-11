@@ -61,3 +61,15 @@ async def create_booking(
         "message": "Booking created",
         "data": ret_booking
     }
+
+
+@router.delete(
+    "/delete_all"
+)
+async def delete_all_bookings(
+        db: DBDep
+):
+    await db.bookings.delete_all_rows()
+    await db.commit()
+
+    return {"message": "All bookings deleted"}

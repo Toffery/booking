@@ -38,7 +38,6 @@ class BookingRepository(BaseRepository):
         )
         available_rooms_ids = await self.session.execute(available_rooms_ids)
         available_rooms_ids = available_rooms_ids.scalars().all()
-        print(available_rooms_ids)
         if booking_data.room_id in available_rooms_ids:
             return await self.add(booking_data)
         else:
