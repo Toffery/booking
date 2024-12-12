@@ -1,5 +1,5 @@
 import datetime
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Response, HTTPException
 from sqlalchemy.exc import IntegrityError
 
 from src.auth.service import AuthService
@@ -22,13 +22,13 @@ async def sign_up(
         username=user_data.username,
         hashed_password=hashed_password
     )
-
     try:
         await db.auth.add(new_user)
     except IntegrityError:
-        return {
-            "message": "User with this email or username already exist"
-        }
+        raise HTTPException(
+            status_code=400,
+            detail="User with this email or username already exist"
+        )
     await db.commit()
 
     return {
@@ -46,14 +46,11 @@ async def login(
         email=user_data.email,
         username=user_data.username
     )
-
     if user is None:
-        return {"message": "User with this email doesn't exist"}
+        raise HTTPException(status_code=400, detail="User with this email or username doesn't exist")
 
     if not AuthService().verify_password(user_data.password, user.hashed_password):
-        return {
-            "message": "Incorrect password"
-        }
+        raise HTTPException(status_code=400, detail="Incorrect password")
 
     access_token = AuthService().create_access_token({"user_id": user.id})
     response.set_cookie(
@@ -95,9 +92,7 @@ async def get_me(
     """
     user = await db.auth.get_one_or_none(id=user_id)
     if user is None:
-        return {
-            "message": "User not found"
-        }
+        return HTTPException(status_code=404, detail="User not found")
     
     user_out: UserOut = UserOut(
         **user.model_dump(

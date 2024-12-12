@@ -12,7 +12,7 @@ class UserIn(BaseModel):
 
 
 class UserCreate(BaseModel):
-    email: EmailStr
+    email: EmailStr | None = None
     hashed_password: str
     username: str | None = None
 

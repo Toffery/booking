@@ -33,6 +33,8 @@ app.dependency_overrides[get_db] = get_db_null_pool
 )
 async def ac() -> AsyncClient:
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+    # async with AsyncClient(app=app, base_url="http://test") as ac:
+
         yield ac
 
 
@@ -97,7 +99,7 @@ async def authenticated_ac(add_user, ac):
             },
         )
         assert response.status_code == 200
-        assert response.json()["access_token"], ("Access token not found", response.status_code, response.text)
+        assert ac.cookies["access_token"], ("Access token not found", response.status_code, response.text)
         new_ac.cookies = {
             "access_token": response.json()["access_token"]
         }
