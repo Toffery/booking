@@ -91,6 +91,10 @@ async def test_auth_workflow(
     response_me = await temp_ac.get(
         "/auth/me",
     )
+
+    assert "password" not in response_me.json()["data"]
+    assert "hashed_password" not in response_me.json()["data"]
+
     assert response_me.status_code == 200, \
         ("Failed to get me", response_me.status_code, response_me.text)
     assert response_me.json()["data"]["username"] == username
