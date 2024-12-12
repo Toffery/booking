@@ -27,8 +27,7 @@ async def temp_ac() -> AsyncClient:
         ("test@ya.ru", "test", "testtest", "test", 400, 200),
         ("test1@ya.ru", "test1", "test", "test1", 200, 400),
         (None, "testtest", "test", "test", 200, 200),
-        # ("", "testtest", "test1", "test1", 400, 400),
-        # ("", "", "", "", 422, 422),
+        (None, "testtest", "test1", "test1", 400, 400)
     ]
 )
 async def test_auth_workflow(
