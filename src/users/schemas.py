@@ -19,7 +19,7 @@ class UserCreate(BaseModel):
 
 class UserBase(BaseModel):
     id: int
-    email: EmailStr
+    email: EmailStr | None = None
     username: str | None = None
 
 
