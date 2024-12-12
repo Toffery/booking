@@ -2,11 +2,7 @@ from datetime import date
 
 import pytest
 
-
-@pytest.fixture(scope="session")
-async def delete_all_bookings(ac):
-    response = await ac.delete("/bookings/delete_all")
-    assert response.status_code == 200
+from tests.conftest import get_db_null_pool
 
 
 @pytest.mark.parametrize(
@@ -18,7 +14,6 @@ async def delete_all_bookings(ac):
         (1, "2024-11-18", "2024-11-25", 24500, 200),
     ]
 )
-@pytest.mark.usefixtures("delete_all_bookings")
 async def test_create_booking(
         room_id,
         date_from,
@@ -65,25 +60,30 @@ async def test_get_my_bookings(authenticated_ac):
     assert response.status_code == 200
 
 
+@pytest.fixture(scope="module")
+async def delete_all_bookings():
+    async for _db in get_db_null_pool():
+        await _db.bookings.delete_all_rows()
+        await _db.commit()
+
+
 @pytest.mark.parametrize(
-    "delete_all, room_id, date_from, date_to, price, status_code, num_of_bookings",
+    "room_id, date_from, date_to, price, status_code, num_of_bookings",
     [
-        (True, 1, "2024-10-18", "2024-10-25", 24500, 200, 1),
-        (False, 1, "2024-10-18", "2024-10-25", 24500, 200, 2)
+        (1, "2024-10-18", "2024-10-25", 24500, 200, 1),
+        (1, "2024-10-18", "2024-10-25", 24500, 200, 2)
     ]
 )
 async def test_add_and_get_my_bookings(
-        delete_all,
         room_id,
         date_from,
         date_to,
         price,
         status_code,
         num_of_bookings,
+        delete_all_bookings,
         authenticated_ac
 ):
-    if delete_all:
-        await authenticated_ac.delete("/bookings/delete_all")
     response = await authenticated_ac.post(
         "/bookings/",
         json={
