@@ -1,4 +1,3 @@
-import asyncio
 from datetime import date
 
 import pytest
@@ -27,8 +26,7 @@ async def test_create_booking(
         price,
         status_code,
         authenticated_ac,
-        db,
-        delete_all_bookings,
+        db
 ):
     response = await authenticated_ac.post(
         "/bookings/",
@@ -68,13 +66,14 @@ async def test_get_my_bookings(authenticated_ac):
 
 
 @pytest.mark.parametrize(
-    "room_id, date_from, date_to, price, status_code, num_of_bookings",
+    "delete_all, room_id, date_from, date_to, price, status_code, num_of_bookings",
     [
-        (1, "2024-10-18", "2024-10-25", 24500, 200, 1),
-        (1, "2024-10-18", "2024-10-25", 24500, 200, 2)
+        (True, 1, "2024-10-18", "2024-10-25", 24500, 200, 1),
+        (False, 1, "2024-10-18", "2024-10-25", 24500, 200, 2)
     ]
 )
 async def test_add_and_get_my_bookings(
+        delete_all,
         room_id,
         date_from,
         date_to,
@@ -83,6 +82,8 @@ async def test_add_and_get_my_bookings(
         num_of_bookings,
         authenticated_ac
 ):
+    if delete_all:
+        await authenticated_ac.delete("/bookings/delete_all")
     response = await authenticated_ac.post(
         "/bookings/",
         json={
