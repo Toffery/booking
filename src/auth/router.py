@@ -1,4 +1,3 @@
-import datetime
 from fastapi import APIRouter, Response, HTTPException
 from sqlalchemy.exc import IntegrityError
 

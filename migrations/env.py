@@ -5,11 +5,11 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from src.users.models import User
-from src.hotels.models import Hotel
-from src.rooms.models import Room
-from src.bookings.models import Booking
-from src.facilities.models import Facility, RoomFacility
+from src.users.models import User  # noqa: F401
+from src.hotels.models import Hotel  # noqa: F401
+from src.rooms.models import Room  # noqa: F401
+from src.bookings.models import Booking  # noqa: F401
+from src.facilities.models import Facility, RoomFacility  # noqa: F401
 from src.database import Base
 from src.config import settings
 

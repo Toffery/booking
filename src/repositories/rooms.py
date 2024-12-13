@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from src.repositories.mappers.mappers import RoomDataMapper
-from src.rooms.schemas import RoomInDB, RoomWithFacilities
+from src.rooms.schemas import RoomWithFacilities
 from src.rooms.models import Room
 from src.repositories.baserepo import BaseRepository
 from src.repositories.utils import get_available_rooms_ids

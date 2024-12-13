@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 
 from src.auth.dependencies import GetUserIdDep
 from src.bookings.schemas import BookingCreate, BookingIn
@@ -48,7 +48,6 @@ async def create_booking(
         user_id=user_id,
         price=room.price*(booking_in.date_to - booking_in.date_from).days
     )
-    # ret_booking = await db.bookings.add(data=_booking_data)
 
     ret_booking = await db.bookings.add_booking(booking_data=_booking_data)
     await db.commit()

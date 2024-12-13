@@ -1,7 +1,7 @@
 from datetime import date
 
 from fastapi import HTTPException
-from sqlalchemy import select, insert
+from sqlalchemy import select
 
 from src.bookings.schemas import BookingCreate
 from src.repositories.baserepo import BaseRepository
@@ -9,7 +9,6 @@ from src.bookings.models import Booking
 from src.repositories.mappers.mappers import BookingDataMapper
 from src.repositories.utils import get_available_rooms_ids
 from src.rooms.models import Room
-from src.rooms.schemas import RoomInDB
 
 
 class BookingRepository(BaseRepository):

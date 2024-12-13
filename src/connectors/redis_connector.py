@@ -1,6 +1,5 @@
 import redis.asyncio as redis
 
-from src.config import settings
 
 class RedisConnector:
     def __init__(self, host: str, port: int):

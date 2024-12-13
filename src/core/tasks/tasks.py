@@ -7,10 +7,12 @@ from src.core.tasks.celery_app import celery_instance
 from PIL import Image
 import os
 
-from src.database import async_session_maker, async_session_maker_null_pool
+from src.database import async_session_maker_null_pool
 from src.utils.db_manager import DBManager
 
 WIDTHS = [1000, 500, 200]
+
+
 @celery_instance.task
 def resize_and_save_image(input_path, output_dir="src/static/images"):
     """
