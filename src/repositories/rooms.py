@@ -15,18 +15,13 @@ class RoomRepository(BaseRepository):
     mapper = RoomDataMapper
 
     async def get_all_by_hotel(self, hotel_id: int):
-        query = (
-            select(Room)
-            .filter_by(hotel_id=hotel_id)
-        )
+        query = select(Room).filter_by(hotel_id=hotel_id)
         result = await self.session.execute(query)
         return [self.mapper.map_to_domain_entity(model) for model in result.scalars().all()]
 
     async def get_one_or_none_with_facilities(self, **filter_by):
         query = (
-            select(self.model)
-            .options(selectinload(self.model.facilities))
-            .filter_by(**filter_by)
+            select(self.model).options(selectinload(self.model.facilities)).filter_by(**filter_by)
         )
         result = await self.session.execute(query)
         model = result.scalars().one_or_none()
@@ -34,14 +29,9 @@ class RoomRepository(BaseRepository):
             return None
         return RoomWithFacilities.model_validate(model)
 
-    async def get_filtered_by_date(
-            self,
-            hotel_id: int,
-            date_from: date,
-            date_to: date
-    ):
+    async def get_filtered_by_date(self, hotel_id: int, date_from: date, date_to: date):
         """
-            Возвращаем СВОБОДНЫЕ номера для отеля {hotel_id} в период {date_from} - {date_to}
+        Возвращаем СВОБОДНЫЕ номера для отеля {hotel_id} в период {date_from} - {date_to}
         """
         available_rooms_ids = get_available_rooms_ids(
             date_from=date_from,

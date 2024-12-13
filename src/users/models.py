@@ -18,7 +18,9 @@ class User(Base):
     patronymic: Mapped[str | None] = mapped_column(String(50))
 
     created_at: Mapped[datetime.datetime] = mapped_column(server_default=func.now())
-    updated_at: Mapped[datetime.datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(
+        server_default=func.now(), onupdate=func.now()
+    )
 
     is_admin: Mapped[bool | None] = mapped_column(Boolean, default=False)
     is_superuser: Mapped[bool | None] = mapped_column(Boolean, default=False)

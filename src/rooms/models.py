@@ -15,7 +15,7 @@ class Room(Base):
     hotel_id: Mapped[int] = mapped_column(ForeignKey("hotels.id"))
     title: Mapped[str] = mapped_column(String(100))
     description: Mapped[str | None] = mapped_column(String(1000))
-    price: Mapped[int] 
+    price: Mapped[int]
     quantity: Mapped[int]
     facilities: Mapped[list["Facility"]] = relationship(
         back_populates="rooms",

@@ -30,7 +30,7 @@ class UserOut(UserBase):
 
     created_at: datetime.datetime
     updated_at: datetime.datetime
-    
+
     is_admin: bool | None = None
     is_superuser: bool | None = None
 

@@ -13,20 +13,18 @@ class HotelRepository(BaseRepository):
     model = Hotel
     mapper = HotelDataMapper
 
-
     async def add(self, hotel_data: HotelCreateOrUpdate):
         stmt = insert(Hotel).values(**hotel_data.model_dump()).returning(Hotel)
         return await self.session.execute(stmt)
 
-
     async def get_filtered_by_date(
-            self,
-            date_from: date,
-            date_to: date,
-            location: str | None = None,
-            title: str | None = None,
-            limit: int = 5,
-            offset: int = 0
+        self,
+        date_from: date,
+        date_to: date,
+        location: str | None = None,
+        title: str | None = None,
+        limit: int = 5,
+        offset: int = 0,
     ):
         available_rooms_ids = get_available_rooms_ids(
             date_from=date_from,
@@ -46,12 +44,7 @@ class HotelRepository(BaseRepository):
         if title:
             title = title.strip().lower()
             query = query.filter(func.lower(Hotel.title).contains(title))
-        query = (
-            query
-            .offset(offset)
-            .limit(limit)
-        )
+        query = query.offset(offset).limit(limit)
 
         result = await self.session.execute(query)
         return [self.mapper.map_to_domain_entity(model) for model in result.scalars().all()]
-

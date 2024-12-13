@@ -20,15 +20,9 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.add_column(
-        "users", sa.Column("first_name", sa.String(length=30), nullable=True)
-    )
-    op.add_column(
-        "users", sa.Column("last_name", sa.String(length=50), nullable=True)
-    )
-    op.add_column(
-        "users", sa.Column("patronymic", sa.String(length=50), nullable=True)
-    )
+    op.add_column("users", sa.Column("first_name", sa.String(length=30), nullable=True))
+    op.add_column("users", sa.Column("last_name", sa.String(length=50), nullable=True))
+    op.add_column("users", sa.Column("patronymic", sa.String(length=50), nullable=True))
     op.add_column(
         "users",
         sa.Column(
@@ -48,9 +42,7 @@ def upgrade() -> None:
         ),
     )
     op.add_column("users", sa.Column("is_admin", sa.Boolean(), nullable=True))
-    op.add_column(
-        "users", sa.Column("is_superuser", sa.Boolean(), nullable=True)
-    )
+    op.add_column("users", sa.Column("is_superuser", sa.Boolean(), nullable=True))
 
 
 def downgrade() -> None:

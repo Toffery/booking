@@ -33,10 +33,7 @@ async def test_booking_crud(db):
         date_to=date(2024, 12, 25),
         price=3000,
     )
-    ret_booking = await db.bookings.edit(
-        update_booking,
-        id=read_booking.id
-    )
+    ret_booking = await db.bookings.edit(update_booking, id=read_booking.id)
     assert ret_booking.date_from == date(2024, 12, 18), "date_from isn't equal to provided"
     assert ret_booking.date_to == date(2024, 12, 25), "date_to isn't equal to provided"
     assert ret_booking.price == 3000, "Price isn't equal to provided"

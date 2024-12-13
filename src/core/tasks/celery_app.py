@@ -8,7 +8,7 @@ celery_instance = Celery(
     broker=settings.REDIS_URL,
     include=[
         "src.core.tasks.tasks",
-    ]
+    ],
 )
 
 celery_instance.conf.beat_schedule = {

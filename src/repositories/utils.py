@@ -7,9 +7,9 @@ from src.rooms.models import Room
 
 
 def get_available_rooms_ids(
-        date_from: date,
-        date_to: date,
-        hotel_id: int | None = None,
+    date_from: date,
+    date_to: date,
+    hotel_id: int | None = None,
 ):
     """
     with FIND_OCCUPIED_ROOMS as (
@@ -37,7 +37,7 @@ def get_available_rooms_ids(
     find_occupied_rooms = (
         select(Booking.room_id, func.count("*").label("num_of_occupied_rooms"))
         .select_from(Booking)
-        .filter(Booking.date_from <= date_to, Booking.date_to >= date_from        )
+        .filter(Booking.date_from <= date_to, Booking.date_to >= date_from)
         .group_by(Booking.room_id)
         .cte("find_occupied_rooms")
     )
@@ -46,30 +46,25 @@ def get_available_rooms_ids(
     count_free_rooms = (
         select(
             Room.id.label("room_id"),
-            (Room.quantity - num_of_occupied_rooms).label("num_of_free_rooms")
+            (Room.quantity - num_of_occupied_rooms).label("num_of_free_rooms"),
         )
         .join_from(
-            Room,
-            find_occupied_rooms,
-            Room.id == find_occupied_rooms.c.room_id,
-            isouter=True)
+            Room, find_occupied_rooms, Room.id == find_occupied_rooms.c.room_id, isouter=True
+        )
         .cte("count_free_rooms")
     )
 
-    room_ids_of_hotel = (
-        select(Room.id)
-        .select_from(Room)
-    )
+    room_ids_of_hotel = select(Room.id).select_from(Room)
     if hotel_id is not None:
-        room_ids_of_hotel = (
-            room_ids_of_hotel.filter_by(hotel_id=hotel_id)
-        )
+        room_ids_of_hotel = room_ids_of_hotel.filter_by(hotel_id=hotel_id)
     room_ids_of_hotel = room_ids_of_hotel.subquery()
     available_rooms_ids = (
         select(count_free_rooms.c.room_id)
         .select_from(count_free_rooms)
-        .filter(count_free_rooms.c.num_of_free_rooms > 0,
-                count_free_rooms.c.room_id.in_(room_ids_of_hotel.element))
+        .filter(
+            count_free_rooms.c.num_of_free_rooms > 0,
+            count_free_rooms.c.room_id.in_(room_ids_of_hotel.element),
+        )
     )
 
     return available_rooms_ids

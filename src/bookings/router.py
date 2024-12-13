@@ -9,44 +9,25 @@ from src.core.tasks.tasks import send_email_notification_on_booking_creation
 router = APIRouter(prefix="/bookings", tags=["Бронирования"])
 
 
-@router.get(
-    "/"
-)
-async def get_all_bookings(
-        db: DBDep,
-        paginator: PaginatorDep
-):
+@router.get("/")
+async def get_all_bookings(db: DBDep, paginator: PaginatorDep):
     offset = (paginator.page - 1) * paginator.per_page
     limit = paginator.per_page
-    return await db.bookings.get_all(
-        limit=limit,
-        offset=offset
-    )
+    return await db.bookings.get_all(limit=limit, offset=offset)
 
 
-@router.get(
-    "/me"
-)
-async def get_my_bookings(
-        db: DBDep,
-        user_id: GetUserIdDep
-):
+@router.get("/me")
+async def get_my_bookings(db: DBDep, user_id: GetUserIdDep):
     return await db.bookings.get_filtered(user_id=user_id)
 
 
-@router.post(
-    "/"
-)
-async def create_booking(
-        db: DBDep,
-        booking_in: BookingIn,
-        user_id: GetUserIdDep
-):
+@router.post("/")
+async def create_booking(db: DBDep, booking_in: BookingIn, user_id: GetUserIdDep):
     room = await db.rooms.get_one_or_none(id=booking_in.room_id)
     _booking_data = BookingCreate(
         **booking_in.model_dump(),
         user_id=user_id,
-        price=room.price*(booking_in.date_to - booking_in.date_from).days
+        price=room.price * (booking_in.date_to - booking_in.date_from).days,
     )
 
     ret_booking = await db.bookings.add_booking(booking_data=_booking_data)
@@ -56,18 +37,11 @@ async def create_booking(
 
     send_email_notification_on_booking_creation.delay(user.email)
 
-    return {
-        "message": "Booking created",
-        "data": ret_booking
-    }
+    return {"message": "Booking created", "data": ret_booking}
 
 
-@router.delete(
-    "/delete_all"
-)
-async def delete_all_bookings(
-        db: DBDep
-):
+@router.delete("/delete_all")
+async def delete_all_bookings(db: DBDep):
     await db.bookings.delete_all_rows()
     await db.commit()
 

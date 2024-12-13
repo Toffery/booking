@@ -1,5 +1,6 @@
 # ruff: noqa: E402
 from unittest import mock
+
 mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f).start()
 
 import pytest
@@ -26,16 +27,13 @@ async def get_db_null_pool():
     async with DBManager(session_factory=async_session_maker_null_pool) as db:
         yield db
 
+
 app.dependency_overrides[get_db] = get_db_null_pool
 
 
-@pytest.fixture(
-    scope="session"
-)
+@pytest.fixture(scope="session")
 async def ac() -> AsyncClient:
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
-    # async with AsyncClient(app=app, base_url="http://test") as ac:
-
         yield ac
 
 
@@ -52,44 +50,41 @@ async def setup_database():
         await conn.run_sync(Base.metadata.create_all)
 
 
-@pytest.fixture(
-    scope="session",
-    autouse=True
-)
+@pytest.fixture(scope="session", autouse=True)
 async def insert_hotels_and_rooms(setup_database, ac):
     with open("tests/mock_hotels.json") as f1, open("tests/mock_rooms.json") as f2:
         hotels = json.load(f1)
         rooms = json.load(f2)
     for hotel in hotels:
         response = await ac.post("/hotels/", json=hotel)
-        assert response.status_code == 200, ("Failed to add hotels in db", response.status_code, response.text)
+        assert response.status_code == 200, (
+            "Failed to add hotels in db",
+            response.status_code,
+            response.text,
+        )
     for room in rooms:
         hotel_id = room["hotel_id"]
-        response = await ac.post(
-            f"/hotels/{hotel_id}/rooms",
-            json=room
+        response = await ac.post(f"/hotels/{hotel_id}/rooms", json=room)
+        assert response.status_code == 200, (
+            "Failed to add rooms in db",
+            response.status_code,
+            response.text,
         )
-        assert response.status_code == 200, ("Failed to add rooms in db", response.status_code, response.text)
 
 
-@pytest.fixture(
-    scope="session",
-    autouse=True
-)
+@pytest.fixture(scope="session", autouse=True)
 async def add_user(setup_database, ac):
     response = await ac.post(
         "/auth/signup",
         json={
             "email": "test@ya.ru",
             "password": "test",
-        }
+        },
     )
     assert response.status_code == 200
 
 
-@pytest.fixture(
-    scope="session"
-)
+@pytest.fixture(scope="session")
 async def authenticated_ac(add_user, ac):
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as new_ac:
         response = await ac.post(
@@ -100,8 +95,10 @@ async def authenticated_ac(add_user, ac):
             },
         )
         assert response.status_code == 200
-        assert ac.cookies["access_token"], ("Access token not found", response.status_code, response.text)
-        new_ac.cookies = {
-            "access_token": response.json()["access_token"]
-        }
+        assert ac.cookies["access_token"], (
+            "Access token not found",
+            response.status_code,
+            response.text,
+        )
+        new_ac.cookies = {"access_token": response.json()["access_token"]}
         yield new_ac

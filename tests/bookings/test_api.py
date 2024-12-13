@@ -12,16 +12,10 @@ from tests.conftest import get_db_null_pool
         (1, "2024-10-18", "2024-10-25", 24500, 200),
         (1, "2024-10-18", "2024-10-25", 24500, 500),
         (1, "2024-11-18", "2024-11-25", 24500, 200),
-    ]
+    ],
 )
 async def test_create_booking(
-        room_id,
-        date_from,
-        date_to,
-        price,
-        status_code,
-        authenticated_ac,
-        db
+    room_id, date_from, date_to, price, status_code, authenticated_ac, db
 ):
     response = await authenticated_ac.post(
         "/bookings/",
@@ -29,7 +23,7 @@ async def test_create_booking(
             "room_id": room_id,
             "date_from": date_from,
             "date_to": date_to,
-        }
+        },
     )
     assert response.status_code == status_code
     if status_code == 200:
@@ -50,7 +44,7 @@ async def test_create_not_authenticated_booking(ac):
             "room_id": 1,
             "date_from": "2024-10-18",
             "date_to": "2024-10-25",
-        }
+        },
     )
     assert response.status_code == 401
 
@@ -71,18 +65,18 @@ async def delete_all_bookings():
     "room_id, date_from, date_to, price, status_code, num_of_bookings",
     [
         (1, "2024-10-18", "2024-10-25", 24500, 200, 1),
-        (1, "2024-10-18", "2024-10-25", 24500, 200, 2)
-    ]
+        (1, "2024-10-18", "2024-10-25", 24500, 200, 2),
+    ],
 )
 async def test_add_and_get_my_bookings(
-        room_id,
-        date_from,
-        date_to,
-        price,
-        status_code,
-        num_of_bookings,
-        delete_all_bookings,
-        authenticated_ac
+    room_id,
+    date_from,
+    date_to,
+    price,
+    status_code,
+    num_of_bookings,
+    delete_all_bookings,
+    authenticated_ac,
 ):
     response = await authenticated_ac.post(
         "/bookings/",
@@ -90,7 +84,7 @@ async def test_add_and_get_my_bookings(
             "room_id": room_id,
             "date_from": date_from,
             "date_to": date_to,
-        }
+        },
     )
     assert response.status_code == status_code, response.json()
 

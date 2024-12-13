@@ -11,11 +11,8 @@ class AuthRepository(BaseRepository):
     mapper = UserDataMapper
 
     async def get_user_in_db(
-            self, 
-            email: str | None = None, 
-            username: str | None = None
+        self, email: str | None = None, username: str | None = None
     ) -> UserInDB | None:
-        
         query = select(self.model)
         if email:
             query = query.filter_by(email=email)
@@ -29,9 +26,7 @@ class AuthRepository(BaseRepository):
 
     async def add(self, data: UserCreate):
         stmt = (
-            insert(self.model)
-            .values(**data.model_dump(exclude_unset=True))
-            .returning(self.model)
+            insert(self.model).values(**data.model_dump(exclude_unset=True)).returning(self.model)
         )
         result = await self.session.execute(stmt)
         model = result.scalars().one()
