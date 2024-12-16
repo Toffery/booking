@@ -1,6 +1,6 @@
 from datetime import date
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, Select
 
 from src.bookings.models import Booking
 from src.rooms.models import Room
@@ -10,7 +10,7 @@ def get_available_rooms_ids(
     date_from: date,
     date_to: date,
     hotel_id: int | None = None,
-):
+) -> Select:
     """
     with FIND_OCCUPIED_ROOMS as (
             select room_id, count( *) as num_of_occupied_rooms

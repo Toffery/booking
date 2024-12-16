@@ -11,7 +11,7 @@ from src.repositories.utils import get_available_rooms_ids
 
 
 class RoomRepository(BaseRepository):
-    model = Room
+    model: Room = Room
     mapper = RoomDataMapper
 
     async def get_all_by_hotel(self, hotel_id: int):

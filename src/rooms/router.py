@@ -1,10 +1,13 @@
 from datetime import date
+from typing import reveal_type
 
 from fastapi import APIRouter, Body
+from pydantic import BaseModel
 
 from src.dependencies import DBDep
 from src.facilities.schemas import RoomFacilityCreate
-from src.rooms.schemas import RoomCreate, RoomUpdate, RoomPatch
+from src.rooms.models import Room
+from src.rooms.schemas import RoomCreate, RoomUpdate, RoomPatch, RoomInDB
 from src.rooms.schemas import RoomIn, RoomUpdateIn, RoomPatchIn
 
 
@@ -56,7 +59,8 @@ async def create_room(
     ),
 ):
     _room_data = RoomCreate(hotel_id=hotel_id, **room_data.model_dump())
-    ret_room = await db.rooms.add(data=_room_data)
+    ret_room: RoomInDB = await db.rooms.add(data=_room_data)
+    print(isinstance(ret_room, BaseModel))
     if room_data.facilities_ids:
         room_facilities = [
             RoomFacilityCreate(room_id=ret_room.id, facility_id=facility_id)
@@ -82,7 +86,7 @@ async def patch_room(hotel_id: int, room_id: int, db: DBDep, room_data: RoomPatc
     """
     is_return_data = False
     data = RoomPatch(**room_data.model_dump(exclude_unset=True))
-
+    ret_room = None
     if any(val is not None for val in data.model_dump().values()):
         is_return_data = True
         ret_room = await db.rooms.edit(
@@ -92,7 +96,7 @@ async def patch_room(hotel_id: int, room_id: int, db: DBDep, room_data: RoomPatc
 
     await db.commit()
 
-    return {"message": "Room updated", "data": ret_room if is_return_data else None}
+    return {"message": "Room updated", "data": ret_room}
 
 
 @router.put(

@@ -1,3 +1,5 @@
+from typing import AsyncGenerator
+
 import pytest
 from httpx import AsyncClient, ASGITransport
 
@@ -15,7 +17,7 @@ async def delete_users():
 
 
 @pytest.fixture(scope="function")
-async def temp_ac() -> AsyncClient:
+async def temp_ac() -> AsyncGenerator[AsyncClient, None]:
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as temp_ac:
         yield temp_ac
 
