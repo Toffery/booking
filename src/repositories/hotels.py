@@ -1,7 +1,6 @@
 from datetime import date
 
-from sqlalchemy import func, insert, select
-from src.hotels.schemas import HotelCreateOrUpdate
+from sqlalchemy import func, select
 from src.hotels.models import Hotel
 from src.repositories.baserepo import BaseRepository
 from src.repositories.mappers.mappers import HotelDataMapper

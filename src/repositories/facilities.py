@@ -1,4 +1,3 @@
-from pydantic import BaseModel
 from sqlalchemy import delete
 
 from src.repositories.baserepo import BaseRepository

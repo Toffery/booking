@@ -1,7 +1,4 @@
-from typing import reveal_type
-
-from pydantic import BaseModel
-from sqlalchemy import select, insert
+from sqlalchemy import select
 
 from src.repositories.mappers.mappers import UserDataMapper
 from src.users.models import User

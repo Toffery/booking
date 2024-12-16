@@ -1,12 +1,9 @@
 from datetime import date
-from typing import reveal_type
 
 from fastapi import APIRouter, Body
-from pydantic import BaseModel
 
 from src.dependencies import DBDep
 from src.facilities.schemas import RoomFacilityCreate
-from src.rooms.models import Room
 from src.rooms.schemas import RoomCreate, RoomUpdate, RoomPatch, RoomInDB
 from src.rooms.schemas import RoomIn, RoomUpdateIn, RoomPatchIn
 

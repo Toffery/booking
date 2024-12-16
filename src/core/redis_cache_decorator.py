@@ -1,8 +1,6 @@
 import functools
 import json
 
-from pydantic import BaseModel
-
 from src.core.setup import redis_manager
 
 

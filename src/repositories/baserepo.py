@@ -1,12 +1,10 @@
-from typing import Sequence, reveal_type, Generic, TypeVar, Any
+from typing import Sequence, Generic, TypeVar, Any
 
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import Base
 from sqlalchemy import delete, insert, select, update
-from sqlalchemy.orm import Session
-
 from src.repositories.mappers.base import DataMapper
 
 

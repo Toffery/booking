@@ -1,12 +1,11 @@
-from typing import TypeVar, Type, reveal_type, Protocol
+from typing import TypeVar, Protocol
 
 from pydantic import BaseModel
 from sqlalchemy import Row, RowMapping
 
 from src.database import Base
 
-# SchemaType = TypeVar("SchemaType", bound=BaseModel)
-# DBModelType = TypeVar("DBModelType", bound=Base)
+
 ModelType = TypeVar("ModelType", bound=Base)
 DomainEntityType = TypeVar("DomainEntityType", bound=BaseModel)
 
