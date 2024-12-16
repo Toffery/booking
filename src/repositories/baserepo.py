@@ -1,10 +1,13 @@
 from typing import Sequence, Generic, TypeVar, Any
 
 from pydantic import BaseModel
+from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import Base
 from sqlalchemy import delete, insert, select, update
+
+from src.exceptions import ObjectNotFoundException
 from src.repositories.mappers.base import DataMapper
 
 
@@ -38,6 +41,17 @@ class BaseRepository(Generic[ModelType, DataMapperType]):
 
         if model is None:
             return None
+        return self.mapper.map_to_domain_entity(model)
+
+    async def get_one(self, **filter_by):
+        query = select(self.model).filter_by(**filter_by)
+        result = await self.session.execute(query)
+
+        try:
+            model = result.scalar_one()
+        except NoResultFound:
+            raise ObjectNotFoundException
+
         return self.mapper.map_to_domain_entity(model)
 
     async def add(self, data: BaseModel, exclude_unset: bool = False):

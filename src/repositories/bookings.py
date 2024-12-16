@@ -4,6 +4,7 @@ from fastapi import HTTPException
 from sqlalchemy import select
 
 from src.bookings.schemas import BookingCreate
+from src.exceptions import NoRoomsAvailableException
 from src.repositories.baserepo import BaseRepository
 from src.bookings.models import Booking
 from src.repositories.mappers.mappers import BookingDataMapper
@@ -34,4 +35,4 @@ class BookingRepository(BaseRepository):
         if booking_data.room_id in available_rooms_ids:
             return await self.add(booking_data)
         else:
-            raise HTTPException(status_code=500, detail="No rooms available")
+            raise NoRoomsAvailableException
