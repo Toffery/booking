@@ -5,20 +5,24 @@ from src.repositories.baserepo import BaseRepository
 from src.facilities.models import Facility, RoomFacility
 from src.facilities.schemas import RoomFacilityCreate
 from src.repositories.mappers.mappers import FacilityDataMapper, RoomFacilityDataMapper
+from src.rooms.schemas import RoomIn, RoomPatchIn, RoomUpdateIn
 
 
-class FacilityRepository(BaseRepository):
+class FacilityRepository(BaseRepository[Facility, FacilityDataMapper]):
     model = Facility
     mapper = FacilityDataMapper
 
 
-class RoomFacilityRepository(BaseRepository):
+class RoomFacilityRepository(BaseRepository[RoomFacility, RoomFacilityDataMapper]):
     model = RoomFacility
     mapper = RoomFacilityDataMapper
 
-    async def update(self, room_data: BaseModel, room_id: int):
+    async def update(self, room_data: RoomIn | RoomPatchIn | RoomUpdateIn, room_id: int):
         existing_facilities = await self.get_filtered(room_id=room_id)
         existing_facilities_ids = [f.facility_id for f in existing_facilities]
+
+        if not room_data.facilities_ids:
+            return
 
         facilities_ids_to_add = [
             f_id for f_id in room_data.facilities_ids if f_id not in existing_facilities_ids

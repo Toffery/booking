@@ -13,9 +13,9 @@ class HotelRepository(BaseRepository):
     model = Hotel
     mapper = HotelDataMapper
 
-    async def add(self, hotel_data: HotelCreateOrUpdate):
-        stmt = insert(Hotel).values(**hotel_data.model_dump()).returning(Hotel)
-        return await self.session.execute(stmt)
+    # async def add(self, hotel_data: HotelCreateOrUpdate):
+    #     stmt = insert(Hotel).values(**hotel_data.model_dump()).returning(Hotel)
+    #     return await self.session.execute(stmt)
 
     async def get_filtered_by_date(
         self,

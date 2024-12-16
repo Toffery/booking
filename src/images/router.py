@@ -13,6 +13,6 @@ def upload_image(file: UploadFile):
     with open(image_path, "wb+") as new_file:
         shutil.copyfileobj(file.file, new_file)
 
-    resize_and_save_image.delay(image_path)
+    resize_and_save_image.delay(image_path)  # type: ignore
 
     return {"filename": file.filename}

@@ -13,4 +13,4 @@ class AuthSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file="src/auth/.env")
 
 
-auth_settings = AuthSettings()
+auth_settings = AuthSettings()  # type: ignore

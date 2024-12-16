@@ -5,8 +5,8 @@ from sqlalchemy import select, insert
 
 from src.repositories.mappers.mappers import UserDataMapper
 from src.users.models import User
-from src.users.schemas import UserInDB, UserCreate
 from src.repositories.baserepo import BaseRepository
+from src.users.schemas import UserInDB
 
 
 class AuthRepository(BaseRepository):
@@ -15,7 +15,7 @@ class AuthRepository(BaseRepository):
 
     async def get_user_in_db(
         self, email: str | None = None, username: str | None = None
-    ) -> BaseModel:
+    ) -> UserInDB:
         query = select(self.model)
         if email:
             query = query.filter_by(email=email)

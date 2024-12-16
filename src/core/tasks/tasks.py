@@ -35,7 +35,7 @@ def resize_and_save_image(input_path, output_dir="src/static/images"):
                 height = int(width * aspect_ratio)
 
                 # Resize the image
-                resized_img = img.resize((width, height), Image.LANCZOS)
+                resized_img = img.resize((width, height), Image.LANCZOS)  # type: ignore
 
                 # Create a new filename
                 base_name = os.path.basename(input_path)

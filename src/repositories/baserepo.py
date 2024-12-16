@@ -1,4 +1,4 @@
-from typing import Sequence, reveal_type
+from typing import Sequence, reveal_type, Generic, TypeVar, Any
 
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,9 +10,14 @@ from sqlalchemy.orm import Session
 from src.repositories.mappers.base import DataMapper
 
 
-class BaseRepository:
-    model: type[Base]
-    mapper: type[DataMapper]
+ModelType = TypeVar("ModelType", bound=Base)
+DataMapperType = TypeVar("DataMapperType", bound=DataMapper)
+DomainEntityType = TypeVar("DomainEntityType", bound=BaseModel)
+
+
+class BaseRepository(Generic[ModelType, DataMapperType]):
+    model: type[ModelType]
+    mapper: type[DataMapperType]
     session: AsyncSession
 
     def __init__(self, session: AsyncSession) -> None:
@@ -37,7 +42,7 @@ class BaseRepository:
             return None
         return self.mapper.map_to_domain_entity(model)
 
-    async def add(self, data: BaseModel, exclude_unset: bool = False) -> BaseModel:
+    async def add(self, data: BaseModel, exclude_unset: bool = False):
         stmt = (
             insert(self.model)
             .values(**data.model_dump(exclude_unset=exclude_unset))
@@ -47,12 +52,16 @@ class BaseRepository:
         model = result.scalars().one()
         return self.mapper.map_to_domain_entity(model)
 
-
-    async def add_bulk(self, data: Sequence[BaseModel]):
+    async def add_bulk(self, data: Sequence[BaseModel]) -> None:
         stmt = insert(self.model).values([item.model_dump() for item in data])
         await self.session.execute(stmt)
 
-    async def edit(self, data: BaseModel, exclude_unset: bool = False, **filter_by):
+    async def edit(
+            self,
+            data: BaseModel,
+            exclude_unset: bool = False,
+            **filter_by
+    ) -> Any | BaseModel:
         stmt = (
             update(self.model)
             .filter_by(**filter_by)
@@ -62,10 +71,10 @@ class BaseRepository:
         result = await self.session.execute(stmt)
         return result.scalars().one()
 
-    async def delete(self, **filter_by):
+    async def delete(self, **filter_by) -> BaseModel | Any:
         stmt = delete(self.model).filter_by(**filter_by).returning(self.model)
         result = await self.session.execute(stmt)
         return result.scalars().one()
 
-    async def delete_all_rows(self):
+    async def delete_all_rows(self) -> None:
         await self.session.execute(delete(self.model))

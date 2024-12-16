@@ -10,8 +10,8 @@ from src.repositories.baserepo import BaseRepository
 from src.repositories.utils import get_available_rooms_ids
 
 
-class RoomRepository(BaseRepository):
-    model: Room = Room
+class RoomRepository(BaseRepository[Room, RoomDataMapper]):
+    model = Room
     mapper = RoomDataMapper
 
     async def get_all_by_hotel(self, hotel_id: int):

@@ -25,7 +25,7 @@ def redis_cache(exp: int):
                 results_from_db = await func(*args, **kwargs)
                 if isinstance(results_from_db, list):
                     dumped = json.dumps([res.model_dump() for res in results_from_db])
-                elif isinstance(results_from_db, BaseModel):
+                else:  # isinstance(results_from_db, BaseModel):
                     dumped = json.dumps(results_from_db.model_dump())
                 await redis_manager.set(key=key_for_redis, value=dumped, exp=exp)
                 return results_from_db

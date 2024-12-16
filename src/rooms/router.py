@@ -60,7 +60,6 @@ async def create_room(
 ):
     _room_data = RoomCreate(hotel_id=hotel_id, **room_data.model_dump())
     ret_room: RoomInDB = await db.rooms.add(data=_room_data)
-    print(isinstance(ret_room, BaseModel))
     if room_data.facilities_ids:
         room_facilities = [
             RoomFacilityCreate(room_id=ret_room.id, facility_id=facility_id)
@@ -84,11 +83,9 @@ async def patch_room(hotel_id: int, room_id: int, db: DBDep, room_data: RoomPatc
     так и полностью, но для полного обновления лучше
     воспользоваться ручкой с методом PUT 'Обновить комнату'.
     """
-    is_return_data = False
     data = RoomPatch(**room_data.model_dump(exclude_unset=True))
     ret_room = None
     if any(val is not None for val in data.model_dump().values()):
-        is_return_data = True
         ret_room = await db.rooms.edit(
             data=data, id=room_id, hotel_id=hotel_id, exclude_unset=True
         )

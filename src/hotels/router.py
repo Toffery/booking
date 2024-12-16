@@ -75,10 +75,10 @@ async def create_hotel(
         }
     ),
 ):
-    ret_hotel = await db.hotels.add(hotel_data=hotel_data)
+    ret_hotel = await db.hotels.add(hotel_data)
     await db.commit()
 
-    return {"message": "Hotel added", "data": ret_hotel.scalars().all()}
+    return {"message": "Hotel added", "data": ret_hotel}
 
 
 @router.put(

@@ -24,6 +24,8 @@ async def get_my_bookings(db: DBDep, user_id: GetUserIdDep):
 @router.post("/")
 async def create_booking(db: DBDep, booking_in: BookingIn, user_id: GetUserIdDep):
     room = await db.rooms.get_one_or_none(id=booking_in.room_id)
+    if not room:
+        return {"message": "Room not found"}
     _booking_data = BookingCreate(
         **booking_in.model_dump(),
         user_id=user_id,
@@ -35,7 +37,7 @@ async def create_booking(db: DBDep, booking_in: BookingIn, user_id: GetUserIdDep
 
     user = await db.auth.get_one_or_none(id=user_id)
 
-    send_email_notification_on_booking_creation.delay(user.email)
+    send_email_notification_on_booking_creation.delay(user.email)  # type: ignore
 
     return {"message": "Booking created", "data": ret_booking}
 

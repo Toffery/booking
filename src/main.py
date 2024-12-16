@@ -22,7 +22,7 @@ from fastapi_cache.backends.redis import RedisBackend
 async def lifespan(app: FastAPI):
     await redis_manager.connect()
     print("Connected to Redis")
-    FastAPICache.init(RedisBackend(redis_manager.redis), prefix="fastapi-cache")
+    FastAPICache.init(RedisBackend(redis_manager._redis), prefix="fastapi-cache")
     yield
     await redis_manager.close()
     print("Redis connection closed")
