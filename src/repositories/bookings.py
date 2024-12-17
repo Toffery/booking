@@ -2,9 +2,10 @@ from datetime import date
 
 from fastapi import HTTPException
 from sqlalchemy import select
+from sqlalchemy.exc import NoResultFound
 
 from src.bookings.schemas import BookingCreate
-from src.exceptions import NoRoomsAvailableException
+from src.exceptions import NoRoomsAvailableException, ObjectNotFoundException
 from src.repositories.baserepo import BaseRepository
 from src.bookings.models import Booking
 from src.repositories.mappers.mappers import BookingDataMapper

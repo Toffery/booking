@@ -1,5 +1,7 @@
 from sqlalchemy import select
+from sqlalchemy.exc import NoResultFound
 
+from src.exceptions import ObjectNotFoundException, UserNotFoundException
 from src.repositories.mappers.mappers import UserDataMapper
 from src.users.models import User
 from src.repositories.baserepo import BaseRepository
@@ -20,13 +22,8 @@ class AuthRepository(BaseRepository):
             query = query.filter_by(username=username)
 
         result = await self.session.execute(query)
-        user = result.scalars().one()
+        try:
+            user = result.scalars().one()
+        except NoResultFound:
+            raise UserNotFoundException
         return self.mapper.map_to_domain_entity(user)
-
-    # async def add(self, data: UserCreate):
-    #     stmt = (
-    #         insert(self.model).values(**data.model_dump(exclude_unset=True)).returning(self.model)
-    #     )
-    #     result = await self.session.execute(stmt)
-    #     model = result.scalars().one()
-    #     return self.mapper.map_to_domain_entity(model)

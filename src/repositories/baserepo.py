@@ -86,7 +86,11 @@ class BaseRepository(Generic[ModelType, DataMapperType]):
     async def delete(self, **filter_by) -> BaseModel | Any:
         stmt = delete(self.model).filter_by(**filter_by).returning(self.model)
         result = await self.session.execute(stmt)
-        return result.scalars().one()
+        try:
+            result = result.scalars().one()
+        except NoResultFound:
+            raise ObjectNotFoundException
+        return result
 
     async def delete_all_rows(self) -> None:
         await self.session.execute(delete(self.model))

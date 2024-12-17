@@ -1,6 +1,8 @@
 from datetime import date
 
 from sqlalchemy import func, select
+
+from src.exceptions import DateRangeException
 from src.hotels.models import Hotel
 from src.repositories.baserepo import BaseRepository
 from src.repositories.mappers.mappers import HotelDataMapper
@@ -25,6 +27,10 @@ class HotelRepository(BaseRepository):
         limit: int = 5,
         offset: int = 0,
     ):
+
+        if date_from >= date_to:
+            raise DateRangeException
+
         available_rooms_ids = get_available_rooms_ids(
             date_from=date_from,
             date_to=date_to,

@@ -25,7 +25,7 @@ async def get_my_bookings(db: DBDep, user_id: GetUserIdDep):
 @router.post("/")
 async def create_booking(db: DBDep, booking_in: BookingIn, user_id: GetUserIdDep):
     try:
-        room = await db.rooms.get_one_or_none(id=booking_in.room_id)
+        room = await db.rooms.get_one(id=booking_in.room_id)
     except ObjectNotFoundException:
         return HTTPException(status_code=404, detail="This room doesn't exist")
 
@@ -34,7 +34,6 @@ async def create_booking(db: DBDep, booking_in: BookingIn, user_id: GetUserIdDep
         user_id=user_id,
         price=room.price * (booking_in.date_to - booking_in.date_from).days,
     )
-
     try:
         ret_booking = await db.bookings.add_booking(booking_data=_booking_data)
     except NoRoomsAvailableException:

@@ -4,6 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from src.auth.service import AuthService
 from src.auth.dependencies import GetUserIdDep
 from src.dependencies import DBDep
+from src.exceptions import ObjectNotFoundException, UserNotFoundException
 from src.users.schemas import UserIn, UserCreate, UserInDB, UserOut
 
 
@@ -29,10 +30,11 @@ async def sign_up(user_data: UserIn, db: DBDep):
 
 @router.post("/login")
 async def login(user_data: UserIn, response: Response, db: DBDep):
-    user: UserInDB = await db.auth.get_user_in_db(
-        email=user_data.email, username=user_data.username
-    )
-    if user is None:
+    try:
+        user: UserInDB = await db.auth.get_user_in_db(
+            email=user_data.email, username=user_data.username
+        )
+    except UserNotFoundException:
         raise HTTPException(
             status_code=400, detail="User with this email or username doesn't exist"
         )

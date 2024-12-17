@@ -66,4 +66,4 @@ def send_emails_to_users_with_today_checkin():
 @celery_instance.task()
 def send_email_notification_on_booking_creation(email: EmailStr):
     with open("log.txt", "a") as log:
-        log.write(f"email sent to {email}")
+        log.write(f"email sent to {email} \n")

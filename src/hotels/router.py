@@ -1,9 +1,11 @@
 from datetime import date
-from fastapi import Query
+from fastapi import Query, HTTPException
 from fastapi_cache.decorator import cache
 
 from fastapi import APIRouter, Body
-from src.hotels.schemas import HotelCreateOrUpdate, HotelPATCH, HotelPUT
+
+from src.exceptions import DateRangeException
+from src.hotels.schemas import HotelCreateOrUpdate, HotelPATCH, HotelPUT, HotelInDB
 from src.dependencies import PaginatorDep, DBDep
 
 
@@ -28,15 +30,17 @@ async def get_hotels(
     """
     offset = (paginator.page - 1) * paginator.per_page
     limit = paginator.per_page
-
-    return await db.hotels.get_filtered_by_date(
-        date_from=date_from,
-        date_to=date_to,
-        location=location,
-        title=title,
-        limit=limit,
-        offset=offset,
-    )
+    try:
+        return await db.hotels.get_filtered_by_date(
+            date_from=date_from,
+            date_to=date_to,
+            location=location,
+            title=title,
+            limit=limit,
+            offset=offset,
+        )
+    except DateRangeException:
+        return HTTPException(status_code=400, detail="Date range is invalid")
 
 
 @router.get(
@@ -46,7 +50,10 @@ async def get_hotel_by_id(
     hotel_id: int,
     db: DBDep,
 ):
-    return await db.hotels.get_one_or_none(id=hotel_id)
+    hotel: HotelInDB = await db.hotels.get_one_or_none(id=hotel_id)
+    if not hotel:
+        return HTTPException(status_code=404, detail="Hotel not found")
+    return hotel
 
 
 @router.post(
