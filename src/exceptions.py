@@ -21,8 +21,12 @@ class WrongPasswordException(BronirovshikException):
     detail = "Неверный пароль"
 
 
-class UserAlreadyExistException(BronirovshikException):
+class UserAlreadyExistsException(BronirovshikException):
     detail = "Пользователь с таким никнеймом или почтой уже существует"
+
+
+class ObjectAlreadyExistsException(BronirovshikException):
+    detail = "Объект с таким идентификатором уже существует"
 
 
 class DateRangeException(BronirovshikException):
