@@ -69,6 +69,7 @@ async def create_room(
 
     _room_data = RoomCreate(hotel_id=hotel_id, **room_data.model_dump())
     ret_room: RoomInDB = await db.rooms.add(data=_room_data)
+
     if room_data.facilities_ids:
         room_facilities = [
             RoomFacilityCreate(room_id=ret_room.id, facility_id=facility_id)
@@ -100,11 +101,14 @@ async def patch_room(hotel_id: int, room_id: int, db: DBDep, room_data: RoomPatc
     data = RoomPatch(**room_data.model_dump(exclude_unset=True))
     ret_room = None
     if any(val is not None for val in data.model_dump().values()):
-        ret_room = await db.rooms.edit(
-            data=data, id=room_id, hotel_id=hotel_id, exclude_unset=True
-        )
-    await db.rooms_facilities.update(room_data, room_id)
+        try:
+            ret_room = await db.rooms.edit(
+                data=data, id=room_id, hotel_id=hotel_id, exclude_unset=True
+            )
+        except ObjectNotFoundException:
+            return HTTPException(status_code=404, detail=f"Room with id={room_id} not found")
 
+    await db.rooms_facilities.update(room_data, room_id)
     await db.commit()
 
     return {"message": "Room updated", "data": ret_room}
@@ -127,10 +131,17 @@ async def update_room(hotel_id: int, room_id: int, db: DBDep, room_data: RoomUpd
         return HTTPException(status_code=404, detail=f"Hotel with id={hotel_id} not found")
 
     data = RoomUpdate(**room_data.model_dump(exclude={"facilities_ids"}))
-    ret_room = await db.rooms.edit(data=data, id=room_id, hotel_id=hotel_id, exclude_unset=False)
+    try:
+        ret_room = await db.rooms.edit(
+            data=data,
+            id=room_id,
+            hotel_id=hotel_id,
+            exclude_unset=False
+        )
+    except ObjectNotFoundException:
+        return HTTPException(status_code=404, detail=f"Room with id={room_id} not found")
 
     await db.rooms_facilities.update(room_data, room_id)
-
     await db.commit()
 
     return {"message": "Room updated", "data": ret_room}
@@ -145,10 +156,11 @@ async def delete_room(hotel_id: int, room_id: int, db: DBDep):
         await db.hotels.get_one(id=hotel_id)
     except ObjectNotFoundException:
         return HTTPException(status_code=404, detail=f"Hotel with id={hotel_id} not found")
+
     try:
         await db.rooms.delete(id=room_id, hotel_id=hotel_id)
     except ObjectNotFoundException:
         return HTTPException(status_code=404, detail=f"Room with id={room_id} not found")
-    await db.commit()
 
+    await db.commit()
     return {"message": "Room deleted"}

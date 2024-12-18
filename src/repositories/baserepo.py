@@ -61,7 +61,10 @@ class BaseRepository(Generic[ModelType, DataMapperType]):
             .returning(self.model)
         )
         result = await self.session.execute(stmt)
-        model = result.scalars().one()
+        try:
+            model = result.scalars().one()
+        except NoResultFound:
+            raise ObjectNotFoundException
         return self.mapper.map_to_domain_entity(model)
 
     async def add_bulk(self, data: Sequence[BaseModel]) -> None:
@@ -80,7 +83,10 @@ class BaseRepository(Generic[ModelType, DataMapperType]):
             .values(**data.model_dump(exclude_unset=exclude_unset))
             .returning(self.model)
         )
-        result = await self.session.execute(stmt)
+        try:
+            result = await self.session.execute(stmt)
+        except NoResultFound:
+            raise ObjectNotFoundException
         return result.scalars().one()
 
     async def delete(self, **filter_by) -> BaseModel | Any:
