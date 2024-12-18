@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.exc import NoResultFound
 
-from src.exceptions import ObjectNotFoundException, UserNotFoundException
+from src.exceptions import UserNotFoundException
 from src.repositories.mappers.mappers import UserDataMapper
 from src.users.models import User
 from src.repositories.baserepo import BaseRepository

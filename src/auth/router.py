@@ -1,10 +1,9 @@
 from fastapi import APIRouter, Response, HTTPException
-from sqlalchemy.exc import IntegrityError
 
 from src.auth.service import AuthService
 from src.auth.dependencies import GetUserIdDep
 from src.dependencies import DBDep
-from src.exceptions import ObjectNotFoundException, UserNotFoundException
+from src.exceptions import UserNotFoundException, ObjectAlreadyExistsException
 from src.users.schemas import UserIn, UserCreate, UserInDB, UserOut
 
 
@@ -15,13 +14,15 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 async def sign_up(user_data: UserIn, db: DBDep):
     hashed_password = AuthService().get_password_hash(user_data.password)
     new_user = UserCreate(
-        email=user_data.email, username=user_data.username, hashed_password=hashed_password
+        email=user_data.email,
+        username=user_data.username,
+        hashed_password=hashed_password
     )
     try:
         await db.auth.add(new_user)
-    except IntegrityError:
+    except ObjectAlreadyExistsException:
         raise HTTPException(
-            status_code=400, detail="User with this email or username already exist"
+            status_code=409, detail="User with this email or username already exist"
         )
     await db.commit()
 
