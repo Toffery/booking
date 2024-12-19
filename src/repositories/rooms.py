@@ -3,12 +3,12 @@ from datetime import date
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from src.exceptions import DateRangeException
 from src.repositories.mappers.mappers import RoomDataMapper
 from src.rooms.schemas import RoomWithFacilities
 from src.rooms.models import Room
 from src.repositories.baserepo import BaseRepository
 from src.repositories.utils import get_available_rooms_ids
+from src.utils.utils import check_date_range_or_raise
 
 
 class RoomRepository(BaseRepository[Room, RoomDataMapper]):
@@ -34,8 +34,7 @@ class RoomRepository(BaseRepository[Room, RoomDataMapper]):
         """
         Возвращаем СВОБОДНЫЕ номера для отеля {hotel_id} в период {date_from} - {date_to}
         """
-        if date_from >= date_to:
-            raise DateRangeException
+        check_date_range_or_raise(date_from, date_to)
 
         available_rooms_ids = get_available_rooms_ids(
             date_from=date_from,

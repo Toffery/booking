@@ -80,9 +80,9 @@ class BaseRepository(Generic[ModelType, DataMapperType]):
         await self.session.execute(stmt)
 
     async def edit(
-            self,
-            data: BaseModel,
-            exclude_unset: bool = False,
+        self,
+        data: BaseModel,
+        exclude_unset: bool = False,
             **filter_by
     ) -> Any | BaseModel:
         stmt = (

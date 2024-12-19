@@ -1,9 +1,10 @@
 from datetime import date
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, Select
 
 from src.exceptions import DateRangeException
 from src.hotels.models import Hotel
+from src.hotels.schemas import HotelInDB
 from src.repositories.baserepo import BaseRepository
 from src.repositories.mappers.mappers import HotelDataMapper
 from src.repositories.utils import get_available_rooms_ids
@@ -14,10 +15,6 @@ class HotelRepository(BaseRepository):
     model = Hotel
     mapper = HotelDataMapper
 
-    # async def add(self, hotel_data: HotelCreateOrUpdate):
-    #     stmt = insert(Hotel).values(**hotel_data.model_dump()).returning(Hotel)
-    #     return await self.session.execute(stmt)
-
     async def get_filtered_by_date(
         self,
         date_from: date,
@@ -26,23 +23,23 @@ class HotelRepository(BaseRepository):
         title: str | None = None,
         limit: int = 5,
         offset: int = 0,
-    ):
+    ) -> list[HotelInDB]:
 
         if date_from >= date_to:
             raise DateRangeException
 
-        available_rooms_ids = get_available_rooms_ids(
+        available_rooms_ids: Select = get_available_rooms_ids(
             date_from=date_from,
             date_to=date_to,
         )
-        available_hotels_ids = (
+        available_hotels_ids: Select = (
             select(Room.hotel_id)
             .distinct()
             .select_from(Room)
             .filter(Room.id.in_(available_rooms_ids))
         )
+        query: Select = select(Hotel).filter(Hotel.id.in_(available_hotels_ids))
 
-        query = select(Hotel).filter(Hotel.id.in_(available_hotels_ids))
         if location:
             location = location.strip().lower()
             query = query.filter(func.lower(Hotel.location).contains(location))
