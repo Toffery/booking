@@ -1,6 +1,9 @@
 log.txt
 src/static/images
 
+# vscode settings
+.vscode/settings.json
+
 # mac-os file
 .DS_Store
 
