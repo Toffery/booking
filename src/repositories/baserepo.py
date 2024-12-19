@@ -48,13 +48,12 @@ class BaseRepository(Generic[ModelType, DataMapperType]):
     async def get_one(self, **filter_by):
         query = select(self.model).filter_by(**filter_by)
         result = await self.session.execute(query)
-
         try:
             model = result.scalar_one()
+            return self.mapper.map_to_domain_entity(model)
         except NoResultFound:
             raise ObjectNotFoundException
 
-        return self.mapper.map_to_domain_entity(model)
 
     async def add(self, data: BaseModel, exclude_unset: bool = False):
         try:
@@ -91,20 +90,19 @@ class BaseRepository(Generic[ModelType, DataMapperType]):
             .values(**data.model_dump(exclude_unset=exclude_unset))
             .returning(self.model)
         )
+        result = await self.session.execute(stmt)
         try:
-            result = await self.session.execute(stmt)
+            return result.scalars().one()
         except NoResultFound:
             raise ObjectNotFoundException
-        return result.scalars().one()
 
     async def delete(self, **filter_by) -> BaseModel | Any:
         stmt = delete(self.model).filter_by(**filter_by).returning(self.model)
         result = await self.session.execute(stmt)
         try:
-            result = result.scalars().one()
+            return result.scalars().one()
         except NoResultFound:
             raise ObjectNotFoundException
-        return result
 
     async def delete_all_rows(self) -> None:
         await self.session.execute(delete(self.model))

@@ -4,9 +4,11 @@ from fastapi_cache.decorator import cache
 
 from fastapi import APIRouter, Body
 
-from src.exceptions import DateRangeException
-from src.hotels.schemas import HotelCreateOrUpdate, HotelPATCH, HotelPUT, HotelInDB
+from src.exceptions import DateRangeException, HotelNotFoundException
+from src.exceptions import ObjectNotFoundException, ObjectAlreadyExistsException
+from src.hotels.schemas import HotelCreateOrUpdate, HotelPATCH
 from src.dependencies import PaginatorDep, DBDep
+from src.httpexceptions import HotelNotFoundHTTPException, HotelAlreadyExistHTTPException
 from src.services.hotels import HotelService
 
 router = APIRouter(prefix="/hotels", tags=["Hotels"])
@@ -47,10 +49,10 @@ async def get_hotel_by_id(
     hotel_id: int,
     db: DBDep,
 ):
-    hotel: HotelInDB = await db.hotels.get_one_or_none(id=hotel_id)
-    if not hotel:
-        raise HTTPException(status_code=404, detail="Hotel not found")
-    return hotel
+    try:
+        return await HotelService(db).get_hotel_by_id(hotel_id)
+    except ObjectNotFoundException:
+        raise HotelNotFoundHTTPException
 
 
 @router.post(
@@ -79,10 +81,11 @@ async def create_hotel(
         }
     ),
 ):
-    ret_hotel = await db.hotels.add(hotel_data)
-    await db.commit()
-
-    return {"message": "Hotel added", "data": ret_hotel}
+    try:
+        created_hotel = await HotelService(db).create_hotel(hotel_data)
+        return {"message": "Hotel added", "data": created_hotel}
+    except ObjectAlreadyExistsException:
+        raise HotelAlreadyExistHTTPException
 
 
 @router.put(
@@ -93,15 +96,13 @@ async def create_hotel(
 async def update_hotel(
     db: DBDep,
     hotel_id: int,
-    hotel_data: HotelPUT = Body(),
+    hotel_data: HotelCreateOrUpdate = Body(),
 ):
-    ret_hotel = await db.hotels.edit(
-        data=hotel_data,
-        id=hotel_id,
-    )
-    await db.commit()
-
-    return {"message": "Hotel updated", "data": ret_hotel}
+    try:
+        updated_hotel = await HotelService(db).update_hotel(hotel_id, hotel_data)
+        return {"message": "Hotel updated", "data": updated_hotel}
+    except ObjectNotFoundException:
+        raise HotelNotFoundHTTPException
 
 
 @router.patch(
@@ -112,21 +113,19 @@ async def update_hotel(
         но для полного обновления лучше воспользоваться ручкой с методом PUT 'Обновить отель'.",
 )
 async def patch_hotel(db: DBDep, hotel_id: int, hotel_data: HotelPATCH = Body()):
-    ret_hotel = await db.hotels.edit(
-        data=hotel_data,
-        exclude_unset=True,
-        id=hotel_id,
-    )
-    await db.commit()
-
-    return {"message": "Hotel updated", "data": ret_hotel}
+    try:
+        patched_hotel = await HotelService(db).patch_hotel(hotel_id, hotel_data)
+        return {"message": "Hotel updated", "data": patched_hotel}
+    except ObjectNotFoundException:
+        raise HotelNotFoundHTTPException
 
 
 @router.delete(
     "/{hotel_id}", summary="Удалить отель", description="Удаление существующего отеля по его id."
 )
 async def delete_hotel(db: DBDep, hotel_id: int):
-    ret_hotel = await db.hotels.delete(id=hotel_id)
-    await db.commit()
-
-    return {"message": "Hotel deleted", "data": ret_hotel}
+    try:
+        deleted_hotel = await HotelService(db).delete_hotel(hotel_id)
+        return {"message": "Hotel deleted", "data": deleted_hotel}
+    except ObjectNotFoundException:
+        raise HotelNotFoundHTTPException

@@ -44,6 +44,7 @@ async def ac() -> AsyncGenerator[AsyncClient, None]:
 )
 async def setup_database():
     # Чтобы базу не снести
+    print(f"{settings.MODE=}")    
     assert settings.MODE == "TEST"
 
     async with engine_null_pool.begin() as conn:

@@ -1,6 +1,6 @@
 from datetime import date
 
-from src.hotels.schemas import HotelInDB
+from src.hotels.schemas import HotelInDB, HotelCreateOrUpdate, HotelPATCH
 from src.services.base import BaseService
 from src.utils.utils import check_date_range_or_raise
 
@@ -29,3 +29,26 @@ class HotelService(BaseService):
             limit=limit,
             offset=offset,
         )
+
+    async def get_hotel_by_id(self, hotel_id: int):
+        return await self.db.hotels.get_one(id=hotel_id)
+
+    async def create_hotel(self, hotel_data: HotelCreateOrUpdate):
+        hotel: HotelInDB = await self.db.hotels.add(hotel_data)
+        await self.db.commit()
+        return hotel
+
+    async def update_hotel(self, hotel_id: int, data: HotelCreateOrUpdate):
+        hotel: HotelInDB = await self.db.hotels.edit(data, id=hotel_id)
+        await self.db.commit()
+        return hotel
+
+    async def patch_hotel(self, hotel_id: int, data: HotelPATCH):
+        hotel: HotelInDB = await self.db.hotels.edit(data, exclude_unset=True, id=hotel_id)
+        await self.db.commit()
+        return hotel
+
+    async def delete_hotel(self, hotel_id: int):
+        hotel: HotelInDB = await self.db.hotels.delete(id=hotel_id)
+        await self.db.commit()
+        return hotel
