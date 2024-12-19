@@ -1,3 +1,4 @@
+import logging
 from typing import Sequence, Generic, TypeVar, Any
 
 from asyncpg import UniqueViolationError
@@ -66,9 +67,12 @@ class BaseRepository(Generic[ModelType, DataMapperType]):
             model = result.scalars().one()
             return self.mapper.map_to_domain_entity(model)
         except IntegrityError as exc:
+            logging.error(f"Error while adding object to database. Input data: {data}. Error type: {type(exc)}. IntegrityError error: {exc}")
             if isinstance(exc.orig.__cause__, UniqueViolationError):
+                logging.error(f"Error while adding object to database. Input data: {data}. Error type: {type(exc)}. UniqueViolationError error: {exc}")
                 raise ObjectAlreadyExistsException from exc
             else:
+                logging.error(f"Error while adding object to database. Input data: {data}. Error type: {type(exc)}. Not known error: {exc}")
                 raise exc
 
     async def add_bulk(self, data: Sequence[BaseModel]) -> None:
@@ -104,3 +108,5 @@ class BaseRepository(Generic[ModelType, DataMapperType]):
 
     async def delete_all_rows(self) -> None:
         await self.session.execute(delete(self.model))
+
+

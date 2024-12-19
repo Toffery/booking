@@ -1,3 +1,6 @@
+# ruff: noqa: E402
+
+import logging
 import sys
 from pathlib import Path
 from contextlib import asynccontextmanager
@@ -6,6 +9,9 @@ from fastapi import FastAPI
 import uvicorn
 
 sys.path.append(str(Path(__file__).parent.parent))
+
+logging.basicConfig(level=logging.INFO)
+
 from src.hotels.router import router as router_hotels
 from src.auth.router import router as router_auth
 from src.rooms.router import router as router_rooms
