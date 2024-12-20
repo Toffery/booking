@@ -9,6 +9,7 @@ from src.repositories.baserepo import BaseRepository
 from src.repositories.mappers.mappers import HotelDataMapper
 from src.repositories.utils import get_available_rooms_ids
 from src.rooms.models import Room
+from src.utils.utils import check_date_range_or_raise
 
 
 class HotelRepository(BaseRepository):
@@ -25,8 +26,7 @@ class HotelRepository(BaseRepository):
         offset: int = 0,
     ) -> list[HotelInDB]:
 
-        if date_from >= date_to:
-            raise DateRangeException
+        check_date_range_or_raise(date_from, date_to)
 
         available_rooms_ids: Select = get_available_rooms_ids(
             date_from=date_from,

@@ -9,6 +9,11 @@ class BronirovshikHTTPException(HTTPException):
         super().__init__(status_code=self.status_code, detail=self.detail)
 
 
+class DateRangeHTTPException(BronirovshikHTTPException):
+    status_code = 409
+    detail = "Date range is invalid"
+
+
 class HotelNotFoundHTTPException(BronirovshikHTTPException):
     status_code = 404
     detail = "Hotel not found"
@@ -22,3 +27,13 @@ class RoomNotFoundHTTPException(BronirovshikHTTPException):
 class HotelAlreadyExistHTTPException(BronirovshikHTTPException):
     status_code = 409
     detail = "Hotel already exist"
+
+
+class RoomAlreadyExistHTTPException(BronirovshikHTTPException):
+    status_code = 409
+    detail = "Room already exist"
+
+
+class UserAlreadyExistHTTPException(BronirovshikHTTPException):
+    status_code = 409
+    detail = "User already exist"

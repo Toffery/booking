@@ -8,7 +8,7 @@ from src.exceptions import DateRangeException, HotelNotFoundException
 from src.exceptions import ObjectNotFoundException, ObjectAlreadyExistsException
 from src.hotels.schemas import HotelCreateOrUpdate, HotelPATCH
 from src.dependencies import PaginatorDep, DBDep
-from src.httpexceptions import HotelNotFoundHTTPException, HotelAlreadyExistHTTPException
+from src.httpexceptions import HotelNotFoundHTTPException, HotelAlreadyExistHTTPException, DateRangeHTTPException
 from src.services.hotels import HotelService
 
 router = APIRouter(prefix="/hotels", tags=["Hotels"])
@@ -39,7 +39,7 @@ async def get_hotels(
             date_to=date_to,
         )
     except DateRangeException:
-        raise HTTPException(status_code=409, detail="Date range is invalid")
+        raise DateRangeHTTPException
 
 
 @router.get(
@@ -81,11 +81,8 @@ async def create_hotel(
         }
     ),
 ):
-    try:
-        created_hotel = await HotelService(db).create_hotel(hotel_data)
-        return {"message": "Hotel added", "data": created_hotel}
-    except ObjectAlreadyExistsException:
-        raise HotelAlreadyExistHTTPException
+    created_hotel = await HotelService(db).create_hotel(hotel_data)
+    return {"message": "Hotel added", "data": created_hotel}
 
 
 @router.put(
