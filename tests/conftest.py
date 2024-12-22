@@ -54,9 +54,9 @@ async def setup_database():
 
 @pytest.fixture(scope="session", autouse=True)
 async def insert_hotels_and_rooms(setup_database, ac):
-    with open("tests/mock_hotels.json") as f1, open("tests/mock_rooms.json") as f2:
-        hotels = json.load(f1)
-        rooms = json.load(f2)
+    with open("tests/mock_hotels.json") as hotels_file, open("tests/mock_rooms.json") as rooms_file:
+        hotels = json.load(hotels_file)
+        rooms = json.load(rooms_file)
     for hotel in hotels:
         response = await ac.post("/hotels/", json=hotel)
         assert response.status_code == 200, (
