@@ -44,6 +44,11 @@ class UserNotFoundHTTPException(BronirovshikHTTPException):
     detail = "User not found"
 
 
+class FacilityNotFoundHTTPException(BronirovshikHTTPException):
+    status_code = 404
+    detail = "Facility not found"
+
+
 class TokenHasExpiredHTTPException(BronirovshikHTTPException):
     status_code = 401
     detail = "Token has been expired"
