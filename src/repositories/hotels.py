@@ -2,7 +2,6 @@ from datetime import date
 
 from sqlalchemy import func, select, Select
 
-from src.exceptions import DateRangeException
 from src.hotels.models import Hotel
 from src.hotels.schemas import HotelInDB
 from src.repositories.baserepo import BaseRepository

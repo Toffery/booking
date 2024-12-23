@@ -1,7 +1,6 @@
 from datetime import datetime, timezone, timedelta
 import jwt
 from passlib.context import CryptContext
-from fastapi import Response
 
 from src.services.base import BaseService
 from src.users.schemas import UserIn, UserCreate, UserInDB, UserOut
@@ -61,7 +60,7 @@ class AuthService(BaseService):
         except ObjectAlreadyExistsException:
             raise UserAlreadyExistsException
 
-    async def login(self, user_data: UserIn, response: Response):
+    async def login(self, user_data: UserIn):
         user: UserInDB = await self.db.auth.get_user_in_db(
             email=user_data.email, username=user_data.username
         )
@@ -70,17 +69,9 @@ class AuthService(BaseService):
             raise IncorrectPasswordException
 
         access_token = self.create_access_token({"user_id": user.id})
-        response.set_cookie(
-            key="access_token",
-            value=access_token,
-            httponly=True,
-            secure=True
-        )
 
         return access_token
 
-    async def logout(self, response: Response):
-        response.delete_cookie(key="access_token")
 
     async def get_me(self, user_id: int):
         try:

@@ -1,14 +1,14 @@
 from datetime import date
-from fastapi import Query, HTTPException
+from fastapi import Query
 from fastapi_cache.decorator import cache
 
 from fastapi import APIRouter, Body
 
-from src.exceptions import DateRangeException, HotelNotFoundException
-from src.exceptions import ObjectNotFoundException, ObjectAlreadyExistsException
+from src.exceptions import DateRangeException
+from src.exceptions import ObjectNotFoundException
 from src.hotels.schemas import HotelCreateOrUpdate, HotelPATCH
 from src.dependencies import PaginatorDep, DBDep
-from src.httpexceptions import HotelNotFoundHTTPException, HotelAlreadyExistHTTPException, DateRangeHTTPException
+from src.httpexceptions import HotelNotFoundHTTPException, DateRangeHTTPException
 from src.services.hotels import HotelService
 
 router = APIRouter(prefix="/hotels", tags=["Hotels"])

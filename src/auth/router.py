@@ -1,12 +1,11 @@
-from fastapi import APIRouter, Response, HTTPException
+from fastapi import APIRouter, Response
 
 from src.httpexceptions import UserAlreadyExistHTTPException, IncorrectPasswordHTTPException, UserNotFoundHTTPException
 from src.services.auth import AuthService
 from src.auth.dependencies import GetUserIdDep
 from src.dependencies import DBDep
-from src.exceptions import UserNotFoundException, ObjectAlreadyExistsException, UserAlreadyExistsException, \
-    IncorrectPasswordException
-from src.users.schemas import UserIn, UserCreate, UserInDB, UserOut
+from src.exceptions import UserNotFoundException, UserAlreadyExistsException, IncorrectPasswordException
+from src.users.schemas import UserIn
 
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
@@ -24,7 +23,13 @@ async def sign_up(user_data: UserIn, db: DBDep):
 @router.post("/login")
 async def login(user_data: UserIn, response: Response, db: DBDep):
     try:
-        access_token = await AuthService(db).login(user_data, response)
+        access_token = await AuthService(db).login(user_data)
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            httponly=True,
+            secure=True
+        )
         return {"access_token": access_token, "token_type": "cookie"}
     except IncorrectPasswordException:
         raise IncorrectPasswordHTTPException
@@ -34,7 +39,7 @@ async def login(user_data: UserIn, response: Response, db: DBDep):
 
 @router.post("/logout")
 async def logout(response: Response):
-    await AuthService().logout(response)
+    response.delete_cookie(key="access_token")
 
     return {"message": "You successfully logged out"}
 

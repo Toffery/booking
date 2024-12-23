@@ -1,12 +1,10 @@
 from datetime import date
 
-from fastapi import APIRouter, Body, HTTPException
+from fastapi import APIRouter, Body
 
 from src.dependencies import DBDep
-from src.exceptions import DateRangeException, ObjectNotFoundException, HotelNotFoundException, RoomNotFoundException
-from src.facilities.schemas import RoomFacilityCreate
+from src.exceptions import DateRangeException, HotelNotFoundException, RoomNotFoundException
 from src.httpexceptions import DateRangeHTTPException, RoomNotFoundHTTPException, HotelNotFoundHTTPException
-from src.rooms.schemas import RoomCreate, RoomUpdate, RoomPatch, RoomInDB
 from src.rooms.schemas import RoomIn, RoomUpdateIn, RoomPatchIn
 from src.services.rooms import RoomService
 
