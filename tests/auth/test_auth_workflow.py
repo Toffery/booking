@@ -27,9 +27,9 @@ async def temp_ac() -> AsyncGenerator[AsyncClient, None]:
     [
         ("test@ya.ru", "test", "test", "test", 200, 200),
         ("test@ya.ru", "test", "testtest", "test", 409, 200),
-        ("test1@ya.ru", "test1", "test", "test1", 200, 400),
+        ("test1@ya.ru", "test1", "test", "test1", 200, 401),
         (None, "testtest", "test", "test", 200, 200),
-        (None, "testtest", "test1", "test1", 409, 400),
+        (None, "testtest", "test1", "test1", 409, 401),
     ],
 )
 async def test_auth_workflow(
@@ -68,7 +68,7 @@ async def test_auth_workflow(
         "/auth/login", json={"username": username, "password": password_login}
     )
 
-    if response_login.status_code == 400:
+    if response_login.status_code == 401:
         return
 
     assert temp_ac.cookies.get("access_token")

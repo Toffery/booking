@@ -1,4 +1,4 @@
-from src.auth.service import AuthService
+from src.services.auth import AuthService
 
 
 def test_create_access_token():

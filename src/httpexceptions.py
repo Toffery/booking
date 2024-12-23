@@ -37,3 +37,23 @@ class RoomAlreadyExistHTTPException(BronirovshikHTTPException):
 class UserAlreadyExistHTTPException(BronirovshikHTTPException):
     status_code = 409
     detail = "User already exist"
+
+
+class UserNotFoundHTTPException(BronirovshikHTTPException):
+    status_code = 404
+    detail = "User not found"
+
+
+class TokenHasExpiredHTTPException(BronirovshikHTTPException):
+    status_code = 401
+    detail = "Token has been expired"
+
+
+class InvalidTokenHTTPException(BronirovshikHTTPException):
+    status_code = 401
+    detail = "Invalid token"
+
+
+class IncorrectPasswordHTTPException(BronirovshikHTTPException):
+    status_code = 401
+    detail = "Incorrect password"

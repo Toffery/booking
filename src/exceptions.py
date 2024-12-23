@@ -39,3 +39,15 @@ class RoomNotFoundException(BronirovshikException):
 
 class HotelNotFoundException(BronirovshikException):
     detail = "Такого отеля не существует"
+
+
+class TokenHasExpiredException(BronirovshikException):
+    detail = "Токен устарел"
+
+
+class InvalidTokenException(BronirovshikException):
+    detail = "Неверный токен"
+
+
+class IncorrectPasswordException(BronirovshikException):
+    detail = "Неверный пароль"
