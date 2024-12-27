@@ -1,10 +1,12 @@
 from fastapi import APIRouter, Response
 
-from src.httpexceptions import UserAlreadyExistHTTPException, IncorrectPasswordHTTPException, UserNotFoundHTTPException
+from src.httpexceptions import UserAlreadyExistHTTPException, IncorrectPasswordHTTPException, UserNotFoundHTTPException, \
+    InvalidTokenHTTPException
 from src.services.auth import AuthService
 from src.auth.dependencies import GetUserIdDep
 from src.dependencies import DBDep
-from src.exceptions import UserNotFoundException, UserAlreadyExistsException, IncorrectPasswordException
+from src.exceptions import UserNotFoundException, UserAlreadyExistsException, IncorrectPasswordException, \
+    TokenHasExpiredException
 from src.users.schemas import UserIn
 
 
@@ -59,3 +61,7 @@ async def get_me(user_id: GetUserIdDep, db: DBDep):
         }
     except UserNotFoundException:
         raise UserNotFoundHTTPException
+    except TokenHasExpiredException:
+        raise TokenHasExpiredHTTPException
+    except InvalidTokenException:
+        raise InvalidTokenHTTPException
