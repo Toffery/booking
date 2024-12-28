@@ -2,6 +2,7 @@ from fastapi import Depends, HTTPException, Request
 
 from typing import Annotated
 
+from src.exceptions import TokenHasExpiredException, InvalidTokenException
 from src.services.auth import AuthService
 
 
@@ -13,7 +14,12 @@ def get_token(request: Request):
 
 
 def get_current_user_id(token: str = Depends(get_token)):
-    data = AuthService().decode_access_token(token)
+    try:
+        data = AuthService().decode_access_token(token)
+    except TokenHasExpiredException:
+        raise TokenHasExpiredException
+    except InvalidTokenException:
+        raise InvalidTokenException
     return data.get("user_id")
 
 

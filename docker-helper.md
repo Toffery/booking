@@ -27,4 +27,9 @@ docker run --name booking_celery_beat \
     booking-image \
     celery --app=src.core.tasks.celery_app:celery_instance worker -l INFO -B
 
+docker run --name booking_nginx \
+    --volume ./nginx.conf:/etc/nginx/nginx.conf \
+    --network=my-network \
+    --rm -p 80:80 nginx
+
 docker build -t booking-image .
