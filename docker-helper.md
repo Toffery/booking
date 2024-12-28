@@ -30,6 +30,6 @@ docker run --name booking_celery_beat \
 docker run --name booking_nginx \
     --volume ./nginx.conf:/etc/nginx/nginx.conf \
     --network=my-network \
-    --rm -p 80:80 nginx
+    --rm -d -p 80:80 nginx
 
 docker build -t booking-image .

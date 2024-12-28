@@ -3,8 +3,8 @@ services:
     container_name: 'booking_backend'
     build:
       context: .
-    ports:
-      - "7777:8000"
+#    ports:
+#      - "7777:8000"
     networks:
       - my-network
     env_file:
