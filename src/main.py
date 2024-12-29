@@ -34,7 +34,7 @@ async def lifespan(app: FastAPI):
     print("Redis connection closed")
 
 
-app = FastAPI(title="Learning FastAPI", lifespan=lifespan)
+app = FastAPI(title="Learning FastAPI 🐍", lifespan=lifespan)
 
 app.include_router(router_auth)
 app.include_router(router_bookings)
