@@ -54,7 +54,6 @@ class BaseRepository(Generic[ModelType, DataMapperType]):
         except NoResultFound:
             raise ObjectNotFoundException
 
-
     async def add(self, data: BaseModel, exclude_unset: bool = False):
         try:
             stmt = (
@@ -66,24 +65,25 @@ class BaseRepository(Generic[ModelType, DataMapperType]):
             model = result.scalars().one()
             return self.mapper.map_to_domain_entity(model)
         except IntegrityError as exc:
-            logging.error(f"Error while adding object to database. Input data: {data}. Error type: {type(exc)}. IntegrityError error: {exc}")
-            if isinstance(exc.orig.__cause__, UniqueViolationError): # type: ignore
-                logging.error(f"Error while adding object to database. Input data: {data}. Error type: {type(exc)}. UniqueViolationError error: {exc}")
+            logging.error(
+                f"Error while adding object to database. Input data: {data}. Error type: {type(exc)}. IntegrityError error: {exc}"
+            )
+            if isinstance(exc.orig.__cause__, UniqueViolationError):  # type: ignore
+                logging.error(
+                    f"Error while adding object to database. Input data: {data}. Error type: {type(exc)}. UniqueViolationError error: {exc}"
+                )
                 raise ObjectAlreadyExistsException from exc
             else:
-                logging.error(f"Error while adding object to database. Input data: {data}. Error type: {type(exc)}. Not known error: {exc}")
+                logging.error(
+                    f"Error while adding object to database. Input data: {data}. Error type: {type(exc)}. Not known error: {exc}"
+                )
                 raise exc
 
     async def add_bulk(self, data: Sequence[BaseModel]) -> None:
         stmt = insert(self.model).values([item.model_dump() for item in data])
         await self.session.execute(stmt)
 
-    async def edit(
-        self,
-        data: BaseModel,
-        exclude_unset: bool = False,
-            **filter_by
-    ) -> Any:
+    async def edit(self, data: BaseModel, exclude_unset: bool = False, **filter_by) -> Any:
         stmt = (
             update(self.model)
             .filter_by(**filter_by)
@@ -106,5 +106,3 @@ class BaseRepository(Generic[ModelType, DataMapperType]):
 
     async def delete_all_rows(self) -> None:
         await self.session.execute(delete(self.model))
-
-

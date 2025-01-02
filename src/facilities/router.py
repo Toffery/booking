@@ -41,9 +41,7 @@ async def create_facility(db: DBDep, facility_data: FacilityIn):
 @router.post("/{facility_id}")
 async def update_facility(db: DBDep, facility_id: int, facility_data: FacilityIn):
     try:
-        updated_facility = await FacilityService(db).update_facility(
-            facility_id, facility_data
-        )
+        updated_facility = await FacilityService(db).update_facility(facility_id, facility_data)
         return {"message": "Facility updated", "data": updated_facility}
     except FacilityNotFoundException:
         raise FacilityNotFoundHTTPException
@@ -56,4 +54,3 @@ async def delete_facility(db: DBDep, facility_id: int):
         return {"message": "Facility deleted"}
     except FacilityNotFoundException:
         raise FacilityNotFoundHTTPException
-

@@ -24,9 +24,7 @@ def upgrade() -> None:
         "rooms_facilities",
         type_="foreignkey",
     )
-    op.drop_constraint(
-        "rooms_facilities_room_id_fkey", "rooms_facilities", type_="foreignkey"
-    )
+    op.drop_constraint("rooms_facilities_room_id_fkey", "rooms_facilities", type_="foreignkey")
     op.create_foreign_key(
         None,
         "rooms_facilities",

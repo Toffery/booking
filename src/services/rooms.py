@@ -2,7 +2,15 @@ from datetime import date
 
 from src.exceptions import ObjectNotFoundException, HotelNotFoundException, RoomNotFoundException
 from src.facilities.schemas import RoomFacilityCreate
-from src.rooms.schemas import RoomCreate, RoomIn, RoomInDB, RoomPatchIn, RoomPatch, RoomUpdateIn, RoomUpdate
+from src.rooms.schemas import (
+    RoomCreate,
+    RoomIn,
+    RoomInDB,
+    RoomPatchIn,
+    RoomPatch,
+    RoomUpdateIn,
+    RoomUpdate,
+)
 from src.services.base import BaseService
 from src.services.hotels import HotelService
 from src.utils.utils import check_date_range_or_raise
@@ -65,10 +73,7 @@ class RoomService(BaseService):
         _: RoomInDB = await self.get_room_by_room_id(hotel_id, room_id)
         data = RoomUpdate(**room_data.model_dump(exclude={"facilities_ids"}))
         updated_room = await self.db.rooms.edit(
-            data=data,
-            exclude_unset=True,
-            id=room_id,
-            hotel_id=hotel_id
+            data=data, exclude_unset=True, id=room_id, hotel_id=hotel_id
         )
         await self.db.rooms_facilities.update(room_data, room_id)
         await self.db.commit()

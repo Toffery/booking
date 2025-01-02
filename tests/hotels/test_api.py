@@ -32,7 +32,7 @@ async def test_create_hotel(ac):
         json={
             "title": "test_hotel",
             "location": "test_location",
-        }
+        },
     )
     assert response.status_code == 200
     assert response.json()["data"]["id"]
@@ -46,7 +46,7 @@ async def test_update_and_patch_hotel(ac):
         json={
             "title": "updated_test_hotel",
             "location": "updated_test_location",
-        }
+        },
     )
     assert response.status_code == 200
     assert response.json()["data"]["id"] == 1
@@ -58,7 +58,7 @@ async def test_update_and_patch_hotel(ac):
         json={
             "title": "updated_test_hotel",
             "location": "updated_test_location",
-        }
+        },
     )
     assert response.status_code == 404
 
@@ -66,7 +66,7 @@ async def test_update_and_patch_hotel(ac):
         "/hotels/1",
         json={
             "title": "patched_test_hotel",
-        }
+        },
     )
     assert response.status_code == 200
     assert response.json()["data"]["id"] == 1
@@ -77,7 +77,7 @@ async def test_update_and_patch_hotel(ac):
         "/hotels/1",
         json={
             "location": "patched_test_location",
-        }
+        },
     )
     assert response.status_code == 200
     assert response.json()["data"]["id"] == 1

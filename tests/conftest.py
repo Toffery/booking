@@ -44,7 +44,7 @@ async def ac() -> AsyncGenerator[AsyncClient, None]:
 )
 async def setup_database():
     # Чтобы базу не снести
-    print(f"{settings.MODE=}")    
+    print(f"{settings.MODE=}")
     assert settings.MODE == "TEST"
 
     async with engine_null_pool.begin() as conn:
@@ -54,7 +54,10 @@ async def setup_database():
 
 @pytest.fixture(scope="session", autouse=True)
 async def insert_hotels_and_rooms(setup_database, ac):
-    with open("tests/mock_hotels.json") as hotels_file, open("tests/mock_rooms.json") as rooms_file:
+    with (
+        open("tests/mock_hotels.json") as hotels_file,
+        open("tests/mock_rooms.json") as rooms_file,
+    ):
         hotels = json.load(hotels_file)
         rooms = json.load(rooms_file)
     for hotel in hotels:

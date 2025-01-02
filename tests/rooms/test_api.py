@@ -35,8 +35,7 @@ async def test_create_room(ac):
             "title": "test_room",
             "price": 1000,
             "quantity": 10,
-
-        }
+        },
     )
     assert response.status_code == 200
     assert response.json()["data"]["id"]
@@ -52,8 +51,8 @@ async def test_update_and_patch_room(ac):
             "title": "updated_test_room",
             "price": 2000,
             "quantity": 20,
-            "description": "updated_test_description"
-        }
+            "description": "updated_test_description",
+        },
     )
     assert response.status_code == 200
     assert response.json()["data"]["id"] == 2
@@ -67,8 +66,8 @@ async def test_update_and_patch_room(ac):
             "title": "updated_test_room",
             "price": 2000,
             "quantity": 20,
-            "description": "updated_test_description"
-        }
+            "description": "updated_test_description",
+        },
     )
     assert response.status_code == 404
 
@@ -76,7 +75,7 @@ async def test_update_and_patch_room(ac):
         "/hotels/1/rooms/2",
         json={
             "title": "patched_test_room",
-        }
+        },
     )
     assert response.status_code == 200
     assert response.json()["data"]["id"] == 2
@@ -84,23 +83,16 @@ async def test_update_and_patch_room(ac):
     assert response.json()["data"]["description"] == "updated_test_description"
 
     response = await ac.patch(
-        "/hotels/1/rooms/2",
-        json={
-            "description": "patched_test_description"
-        }
+        "/hotels/1/rooms/2", json={"description": "patched_test_description"}
     )
     assert response.status_code == 200
     assert response.json()["data"]["id"] == 2
     assert response.json()["data"]["title"] == "patched_test_room"
     assert response.json()["data"]["description"] == "patched_test_description"
 
-
     response = await ac.patch(
         "/hotels/1/rooms/100",
-        json={
-            "title": "patched_test_room",
-            "description": "patched_test_description"
-        }
+        json={"title": "patched_test_room", "description": "patched_test_description"},
     )
     assert response.status_code == 404
 

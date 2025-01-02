@@ -26,7 +26,9 @@ async def test_hotels_crud(db):
     hotel_data_to_patch = HotelPATCH(
         title="Patched Test Hotel",
     )
-    patched_hotel = await db.hotels.edit(hotel_data_to_patch, exclude_unset=True, id=created_hotel.id)
+    patched_hotel = await db.hotels.edit(
+        hotel_data_to_patch, exclude_unset=True, id=created_hotel.id
+    )
     assert patched_hotel
     assert patched_hotel.title == "Patched Test Hotel"
     assert patched_hotel.location == "Yoshkar-Ola, Panfilova st. 2"
@@ -34,7 +36,9 @@ async def test_hotels_crud(db):
     hotel_data_to_patch = HotelPATCH(
         location="Patched location",
     )
-    patched_hotel = await db.hotels.edit(hotel_data_to_patch, exclude_unset=True, id=created_hotel.id)
+    patched_hotel = await db.hotels.edit(
+        hotel_data_to_patch, exclude_unset=True, id=created_hotel.id
+    )
     assert patched_hotel
     assert patched_hotel.title == "Patched Test Hotel"
     assert patched_hotel.location == "Patched location"

@@ -24,7 +24,6 @@ class HotelRepository(BaseRepository):
         limit: int = 5,
         offset: int = 0,
     ) -> list[HotelInDB]:
-
         check_date_range_or_raise(date_from, date_to)
 
         available_rooms_ids: Select = get_available_rooms_ids(

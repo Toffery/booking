@@ -4,11 +4,7 @@ from src.rooms.schemas import RoomCreate, RoomInDB, RoomUpdate, RoomPatch
 async def test_rooms_without_facilities_crud(db):
     hotel_id: int = 1
     room_to_create: RoomCreate = RoomCreate(
-        hotel_id=hotel_id,
-        title="Test room",
-        description="Test description",
-        price=100,
-        quantity=3
+        hotel_id=hotel_id, title="Test room", description="Test description", price=100, quantity=3
     )
     created_room: RoomInDB = await db.rooms.add(room_to_create)
     assert created_room
@@ -19,15 +15,10 @@ async def test_rooms_without_facilities_crud(db):
     assert created_room.quantity == 3
 
     room_data_to_update = RoomUpdate(
-        title="Updated room",
-        description="Updated description",
-        price=200,
-        quantity=4
+        title="Updated room", description="Updated description", price=200, quantity=4
     )
     updated_room: RoomInDB = await db.rooms.edit(
-        room_data_to_update,
-        id=created_room.id,
-        hotel_id=hotel_id
+        room_data_to_update, id=created_room.id, hotel_id=hotel_id
     )
     assert updated_room
     assert updated_room.hotel_id == hotel_id
@@ -41,10 +32,7 @@ async def test_rooms_without_facilities_crud(db):
         price=300,
     )
     patched_room: RoomInDB = await db.rooms.edit(
-        room_data_to_patch,
-        exclude_unset=True,
-        id=created_room.id,
-        hotel_id=hotel_id
+        room_data_to_patch, exclude_unset=True, id=created_room.id, hotel_id=hotel_id
     )
     assert patched_room
     assert patched_room.hotel_id == hotel_id

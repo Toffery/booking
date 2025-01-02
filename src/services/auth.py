@@ -5,8 +5,15 @@ from passlib.context import CryptContext
 from src.services.base import BaseService
 from src.users.schemas import UserIn, UserCreate, UserInDB, UserOut
 from src.auth.config import auth_settings
-from src.exceptions import TokenHasExpiredException, InvalidTokenException, ObjectAlreadyExistsException, \
-    UserAlreadyExistsException, IncorrectPasswordException, ObjectNotFoundException, UserNotFoundException
+from src.exceptions import (
+    TokenHasExpiredException,
+    InvalidTokenException,
+    ObjectAlreadyExistsException,
+    UserAlreadyExistsException,
+    IncorrectPasswordException,
+    ObjectNotFoundException,
+    UserNotFoundException,
+)
 
 SECRET_KEY = auth_settings.JWT_SECRET
 ALGORITHM = auth_settings.JWT_ALG
@@ -50,9 +57,7 @@ class AuthService(BaseService):
     async def sign_up(self, user_data: UserIn):
         hashed_password = self.get_password_hash(user_data.password)
         new_user = UserCreate(
-            email=user_data.email,
-            username=user_data.username,
-            hashed_password=hashed_password
+            email=user_data.email, username=user_data.username, hashed_password=hashed_password
         )
         try:
             await self.db.auth.add(new_user)
@@ -71,7 +76,6 @@ class AuthService(BaseService):
         access_token = self.create_access_token({"user_id": user.id})
 
         return access_token
-
 
     async def get_me(self, user_id: int):
         try:

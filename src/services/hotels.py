@@ -6,7 +6,6 @@ from src.utils.utils import check_date_range_or_raise
 
 
 class HotelService(BaseService):
-
     async def get_hotels(
         self,
         paginator,
@@ -15,7 +14,6 @@ class HotelService(BaseService):
         date_from: date,
         date_to: date,
     ) -> list[HotelInDB]:
-
         check_date_range_or_raise(date_from, date_to)
 
         offset = (paginator.page - 1) * paginator.per_page

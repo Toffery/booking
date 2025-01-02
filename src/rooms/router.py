@@ -4,7 +4,11 @@ from fastapi import APIRouter, Body
 
 from src.dependencies import DBDep
 from src.exceptions import DateRangeException, HotelNotFoundException, RoomNotFoundException
-from src.httpexceptions import DateRangeHTTPException, RoomNotFoundHTTPException, HotelNotFoundHTTPException
+from src.httpexceptions import (
+    DateRangeHTTPException,
+    RoomNotFoundHTTPException,
+    HotelNotFoundHTTPException,
+)
 from src.rooms.schemas import RoomIn, RoomUpdateIn, RoomPatchIn
 from src.services.rooms import RoomService
 
@@ -41,7 +45,6 @@ async def get_single_room(hotel_id: int, room_id: int, db: DBDep):
         raise HotelNotFoundHTTPException
 
 
-
 @router.post("/{hotel_id}/rooms", summary="Создать номер")
 async def create_room(
     hotel_id: int,
@@ -76,7 +79,6 @@ async def create_room(
         return {"message": "Room created!", "data": created_room}
     except HotelNotFoundException:
         raise HotelNotFoundHTTPException
-
 
 
 @router.patch(

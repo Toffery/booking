@@ -1,12 +1,22 @@
 from fastapi import APIRouter, Response
 
-from src.httpexceptions import UserAlreadyExistHTTPException, IncorrectPasswordHTTPException, UserNotFoundHTTPException, \
-    InvalidTokenHTTPException, TokenHasExpiredHTTPException
+from src.httpexceptions import (
+    UserAlreadyExistHTTPException,
+    IncorrectPasswordHTTPException,
+    UserNotFoundHTTPException,
+    InvalidTokenHTTPException,
+    TokenHasExpiredHTTPException,
+)
 from src.services.auth import AuthService
 from src.auth.dependencies import GetUserIdDep
 from src.dependencies import DBDep
-from src.exceptions import UserNotFoundException, UserAlreadyExistsException, IncorrectPasswordException, \
-    TokenHasExpiredException, InvalidTokenException
+from src.exceptions import (
+    UserNotFoundException,
+    UserAlreadyExistsException,
+    IncorrectPasswordException,
+    TokenHasExpiredException,
+    InvalidTokenException,
+)
 from src.users.schemas import UserIn
 
 
@@ -26,12 +36,7 @@ async def sign_up(user_data: UserIn, db: DBDep):
 async def login(user_data: UserIn, response: Response, db: DBDep):
     try:
         access_token = await AuthService(db).login(user_data)
-        response.set_cookie(
-            key="access_token",
-            value=access_token,
-            httponly=True,
-            secure=True
-        )
+        response.set_cookie(key="access_token", value=access_token, httponly=True, secure=True)
         return {"access_token": access_token, "token_type": "cookie"}
     except IncorrectPasswordException:
         raise IncorrectPasswordHTTPException
