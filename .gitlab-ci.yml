@@ -1,7 +1,8 @@
 stages:
   - build
-  - lint_format
   - migrate
+  - static_checker
+  - lint_format
   - test
   - deploy
 
@@ -19,6 +20,11 @@ migrate-job:
   script:
     - docker run --rm --network my-network booking-api-image alembic upgrade head
 
+static-checker-job:
+  stage: static_checker
+  script:
+    - docker run --rm --network my-network booking-api-image pyright
+
 lint-job:
   stage: lint_format
   script:
@@ -27,7 +33,7 @@ lint-job:
 format-job:
   stage: lint_format
   script:
-    - docker run --rm --network my-network booking-api-image ruff format
+    - docker run --rm --network my-network booking-api-image ruff format --check
 
 
 test-job:

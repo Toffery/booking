@@ -1,2 +1,6 @@
 [tool.ruff]
 line-length = 99
+
+[tool.pyright]
+include = ["src"]
+exclude = ["migrations"]

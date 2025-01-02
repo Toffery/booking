@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Response
 
 from src.httpexceptions import UserAlreadyExistHTTPException, IncorrectPasswordHTTPException, UserNotFoundHTTPException, \
-    InvalidTokenHTTPException
+    InvalidTokenHTTPException, TokenHasExpiredHTTPException
 from src.services.auth import AuthService
 from src.auth.dependencies import GetUserIdDep
 from src.dependencies import DBDep
 from src.exceptions import UserNotFoundException, UserAlreadyExistsException, IncorrectPasswordException, \
-    TokenHasExpiredException
+    TokenHasExpiredException, InvalidTokenException
 from src.users.schemas import UserIn
 
 

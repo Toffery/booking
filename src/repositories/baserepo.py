@@ -67,7 +67,7 @@ class BaseRepository(Generic[ModelType, DataMapperType]):
             return self.mapper.map_to_domain_entity(model)
         except IntegrityError as exc:
             logging.error(f"Error while adding object to database. Input data: {data}. Error type: {type(exc)}. IntegrityError error: {exc}")
-            if isinstance(exc.orig.__cause__, UniqueViolationError):
+            if isinstance(exc.orig.__cause__, UniqueViolationError): # type: ignore
                 logging.error(f"Error while adding object to database. Input data: {data}. Error type: {type(exc)}. UniqueViolationError error: {exc}")
                 raise ObjectAlreadyExistsException from exc
             else:
@@ -83,7 +83,7 @@ class BaseRepository(Generic[ModelType, DataMapperType]):
         data: BaseModel,
         exclude_unset: bool = False,
             **filter_by
-    ) -> Any | BaseModel:
+    ) -> Any:
         stmt = (
             update(self.model)
             .filter_by(**filter_by)
@@ -96,7 +96,7 @@ class BaseRepository(Generic[ModelType, DataMapperType]):
         except NoResultFound:
             raise ObjectNotFoundException
 
-    async def delete(self, **filter_by) -> BaseModel | Any:
+    async def delete(self, **filter_by) -> Any:
         stmt = delete(self.model).filter_by(**filter_by).returning(self.model)
         result = await self.session.execute(stmt)
         try:
