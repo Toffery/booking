@@ -1,5 +1,8 @@
 stages:
   - build
+  - lint_format
+  - migrate
+  - test
   - deploy
 
 build-job:
@@ -10,6 +13,27 @@ build-job:
     - cp ${AUTH_ENV} src/auth/.env
   script:
     - docker build -t booking-api-image .
+
+migrate-job:
+  stage: migrate
+  script:
+    - docker run --rm --network my-network booking-api-image alembic upgrade head
+
+lint-job:
+  stage: lint_format
+  script:
+    - docker run --rm --network my-network booking-api-image ruff check
+
+format-job:
+  stage: ling_format
+  script:
+    - docker run --rm --network my-network booking-api-image ruff format
+
+
+test-job:
+  stage: test
+  script:
+    - docker run --rm --network my-network booking-api-image pytest -s -v
 
 deploy-job:
   stage: deploy
