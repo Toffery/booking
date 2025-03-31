@@ -18,28 +18,28 @@ build-job:
 migrate-job:
   stage: migrate
   script:
-    - docker run --rm --network my-network booking-api-image alembic upgrade head
+    - docker run --rm --network booking_network booking-api-image alembic upgrade head
 
 static-checker-job:
   stage: static_checker
   script:
-    - docker run --rm --network my-network booking-api-image pyright
+    - docker run --rm --network booking_network booking-api-image pyright
 
 lint-job:
   stage: lint_format
   script:
-    - docker run --rm --network my-network booking-api-image ruff check
+    - docker run --rm --network booking_network booking-api-image ruff check
 
 format-job:
   stage: lint_format
   script:
-    - docker run --rm --network my-network booking-api-image ruff format --check
+    - docker run --rm --network booking_network booking-api-image ruff format --check
 
 
 test-job:
   stage: test
   script:
-    - docker run --rm --network my-network booking-api-image pytest -s -v
+    - docker run --rm --network booking_network booking-api-image pytest -s -v
 
 deploy-job:
   stage: deploy

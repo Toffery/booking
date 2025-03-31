@@ -3,13 +3,13 @@ services:
     container_name: 'booking_backend'
     image: booking-api-image
     networks:
-      - my-network
+      - booking_network
 
   booking_celery_worker_service:
     container_name: 'booking_celery_worker'
     image: booking-api-image
     networks:
-      - my-network
+      - booking_network
     command:
       ["celery", "--app=src.core.tasks.celery_app:celery_instance", "worker", "-l", "INFO"]
 
@@ -17,10 +17,10 @@ services:
     container_name: 'booking_celery_beat'
     image: booking-api-image
     networks:
-      - my-network
+      - booking_network
     command:
       ["celery", "--app=src.core.tasks.celery_app:celery_instance", "beat", "-l", "INFO" ]
 
 networks:
-  my-network:
+  booking_network:
     external: True

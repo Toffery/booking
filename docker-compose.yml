@@ -3,10 +3,8 @@ services:
     container_name: 'booking_backend'
     build:
       context: .
-#    ports:
-#      - "7777:8000"
     networks:
-      - my-network
+      - booking_network
     env_file:
       - .env
 
@@ -15,7 +13,7 @@ services:
     build:
       context: .
     networks:
-      - my-network
+      - booking_network
     env_file:
       - .env
     command:
@@ -26,12 +24,12 @@ services:
     build:
       context: .
     networks:
-      - my-network
+      - booking_network
     env_file:
       - .env
     command:
       ["celery", "--app=src.core.tasks.celery_app:celery_instance", "beat", "-l", "INFO" ]
 
 networks:
-  my-network:
+  booking_network:
     external: True
