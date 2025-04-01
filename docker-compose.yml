@@ -4,7 +4,7 @@ services:
     build:
       context: .
     networks:
-      - booking_network
+      - my-network
     env_file:
       - .env
 
@@ -13,7 +13,7 @@ services:
     build:
       context: .
     networks:
-      - booking_network
+      - my-network
     env_file:
       - .env
     command:
@@ -24,12 +24,12 @@ services:
     build:
       context: .
     networks:
-      - booking_network
+      - my-network
     env_file:
       - .env
     command:
       ["celery", "--app=src.core.tasks.celery_app:celery_instance", "beat", "-l", "INFO" ]
 
 networks:
-  booking_network:
+  my-network:
     external: True

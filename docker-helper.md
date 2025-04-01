@@ -34,7 +34,14 @@ docker run --name booking_nginx \
     --network=my-network \
     --rm -d -p 80:80 -p 443:443 nginx
 
+docker run --name booking_nginx \
+    -v ${PWD}/nginx.conf:/etc/nginx/nginx.conf \
+    --network=my-network \
+    --rm -d -p 80:80 nginx
+
 docker build -t booking-image .
+
+docker inspect booking_cache -f "{{json .NetworkSettings.Networks }}"
 
 
 Certificate is saved at: /etc/letsencrypt/live/mrtoffery.ru/fullchain.pem
