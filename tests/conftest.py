@@ -1,7 +1,10 @@
 # ruff: noqa: E402
 from typing import AsyncGenerator
 from unittest import mock
+import os
 
+# Set test mode before importing settings
+os.environ["MODE"] = "TEST"
 mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f).start()
 
 import pytest
@@ -45,6 +48,7 @@ async def ac() -> AsyncGenerator[AsyncClient, None]:
 async def setup_database():
     # Чтобы базу не снести
     print(f"{settings.MODE=}")
+    print(f"{settings.DB_URL=}")
     assert settings.MODE == "TEST"
 
     async with engine_null_pool.begin() as conn:
