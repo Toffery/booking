@@ -5,6 +5,7 @@ import os
 
 # Set test mode before importing settings
 os.environ["MODE"] = "TEST"
+# Mock the FastAPI Cache Decorator
 mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f).start()
 
 import pytest
