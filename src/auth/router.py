@@ -18,6 +18,7 @@ from src.exceptions import (
     InvalidTokenException,
 )
 from src.users.schemas import UserIn
+from src.config import settings
 
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
@@ -36,8 +37,10 @@ async def sign_up(user_data: UserIn, db: DBDep):
 async def login(user_data: UserIn, response: Response, db: DBDep):
     try:
         access_token = await AuthService(db).login(user_data)
-        response.set_cookie(key="access_token", value=access_token, httponly=True, secure=True)
-        return {"access_token": access_token, "token_type": "cookie"}
+        response.set_cookie(
+            key="access_token", value=access_token, httponly=True, secure=settings.is_production
+        )
+        return {"access_token": access_token, "token_type": "cookie", "message": "HELLO"}
     except IncorrectPasswordException:
         raise IncorrectPasswordHTTPException
     except UserNotFoundException:
