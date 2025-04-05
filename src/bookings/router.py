@@ -45,11 +45,3 @@ async def create_booking(db: DBDep, booking_in: BookingIn, user_id: GetUserIdDep
     send_email_notification_on_booking_creation.delay(user.email)  # type: ignore
 
     return {"message": "Booking created", "data": ret_booking}
-
-
-@router.delete("/delete_all")
-async def delete_all_bookings(db: DBDep):
-    await db.bookings.delete_all_rows()
-    await db.commit()
-
-    return {"message": "All bookings deleted"}
