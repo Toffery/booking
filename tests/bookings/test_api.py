@@ -54,6 +54,11 @@ async def test_get_my_bookings(authenticated_ac):
     assert response.status_code == 200
 
 
+async def test_get_my_booking_not_authenticated(ac):
+    response = await ac.get("/bookings/me")
+    assert response.status_code == 401
+
+
 @pytest.fixture(scope="module")
 async def delete_all_bookings():
     async for _db in get_db_null_pool():

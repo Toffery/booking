@@ -14,6 +14,7 @@ elif os.getenv("MODE") == "DEV":
     env_file = ".docker.env"
 else:
     env_file = ".env"
+print(f"{env_file=}")
 load_dotenv(env_file, override=True)
 
 

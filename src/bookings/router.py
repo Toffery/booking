@@ -1,17 +1,18 @@
 from fastapi import APIRouter, HTTPException
 
-from src.auth.dependencies import GetUserIdDep
+from src.auth.dependencies import GetSuperuserIdDep, GetUserIdDep
 from src.bookings.schemas import BookingCreate, BookingIn
 from src.dependencies import DBDep, PaginatorDep
 
 from src.core.tasks.tasks import send_email_notification_on_booking_creation
 from src.exceptions import ObjectNotFoundException, NoRoomsAvailableException
+from src.httpexceptions import RoomNotFoundHTTPException
 
 router = APIRouter(prefix="/bookings", tags=["Бронирования"])
 
 
 @router.get("/")
-async def get_all_bookings(db: DBDep, paginator: PaginatorDep):
+async def get_all_bookings(db: DBDep, paginator: PaginatorDep, superuser_id: GetSuperuserIdDep):
     offset = (paginator.page - 1) * paginator.per_page
     limit = paginator.per_page
     return await db.bookings.get_all(limit=limit, offset=offset)
@@ -27,7 +28,7 @@ async def create_booking(db: DBDep, booking_in: BookingIn, user_id: GetUserIdDep
     try:
         room = await db.rooms.get_one(id=booking_in.room_id)
     except ObjectNotFoundException:
-        return HTTPException(status_code=404, detail="This room doesn't exist")
+        raise RoomNotFoundHTTPException
 
     _booking_data = BookingCreate(
         **booking_in.model_dump(),

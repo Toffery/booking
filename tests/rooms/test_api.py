@@ -28,8 +28,8 @@ async def test_get_room_by_id(ac):
     assert response.status_code == 404
 
 
-async def test_create_room(ac):
-    response = await ac.post(
+async def test_create_room(admin_ac):
+    response = await admin_ac.post(
         "/hotels/1/rooms",
         json={
             "title": "test_room",
@@ -44,8 +44,20 @@ async def test_create_room(ac):
     assert response.json()["data"]["quantity"] == 10
 
 
-async def test_update_and_patch_room(ac):
-    response = await ac.put(
+async def test_create_room_not_admin(authenticated_ac):
+    response = await authenticated_ac.post(
+        "/hotels/1/rooms",
+        json={
+            "title": "test_room",
+            "price": 1000,
+            "quantity": 10,
+        },
+    )
+    assert response.status_code == 403
+
+
+async def test_update_and_patch_room(admin_ac):
+    response = await admin_ac.put(
         "/hotels/1/rooms/2",
         json={
             "title": "updated_test_room",
@@ -60,7 +72,7 @@ async def test_update_and_patch_room(ac):
     assert response.json()["data"]["price"] == 2000
     assert response.json()["data"]["quantity"] == 20
 
-    response = await ac.put(
+    response = await admin_ac.put(
         "/hotels/1/rooms/100",
         json={
             "title": "updated_test_room",
@@ -71,7 +83,7 @@ async def test_update_and_patch_room(ac):
     )
     assert response.status_code == 404
 
-    response = await ac.patch(
+    response = await admin_ac.patch(
         "/hotels/1/rooms/2",
         json={
             "title": "patched_test_room",
@@ -82,7 +94,7 @@ async def test_update_and_patch_room(ac):
     assert response.json()["data"]["title"] == "patched_test_room"
     assert response.json()["data"]["description"] == "updated_test_description"
 
-    response = await ac.patch(
+    response = await admin_ac.patch(
         "/hotels/1/rooms/2", json={"description": "patched_test_description"}
     )
     assert response.status_code == 200
@@ -90,16 +102,21 @@ async def test_update_and_patch_room(ac):
     assert response.json()["data"]["title"] == "patched_test_room"
     assert response.json()["data"]["description"] == "patched_test_description"
 
-    response = await ac.patch(
+    response = await admin_ac.patch(
         "/hotels/1/rooms/100",
         json={"title": "patched_test_room", "description": "patched_test_description"},
     )
     assert response.status_code == 404
 
 
-async def test_delete_room(ac):
-    response = await ac.delete("/hotels/1/rooms/2")
+async def test_delete_room(admin_ac):
+    response = await admin_ac.delete("/hotels/1/rooms/2")
     assert response.status_code == 200
 
-    response = await ac.get("/hotels/1/rooms/2")
+    response = await admin_ac.get("/hotels/1/rooms/2")
     assert response.status_code == 404
+
+
+async def test_delete_room_not_admin(authenticated_ac):
+    response = await authenticated_ac.delete("/hotels/1/rooms/1")
+    assert response.status_code == 403

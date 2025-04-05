@@ -73,7 +73,9 @@ class AuthService(BaseService):
         if not self.verify_password(user_data.password, user.hashed_password):
             raise IncorrectPasswordException
 
-        access_token = self.create_access_token({"user_id": user.id})
+        access_token = self.create_access_token(
+            {"user_id": user.id, "is_superuser": user.is_superuser, "is_admin": user.is_admin}
+        )
 
         return access_token
 

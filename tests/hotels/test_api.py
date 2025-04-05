@@ -26,8 +26,19 @@ async def test_get_hotel_by_id(ac):
     assert response.status_code == 404
 
 
-async def test_create_hotel(ac):
-    response = await ac.post(
+async def test_create_hotel_not_admin(authenticated_ac):
+    response = await authenticated_ac.post(
+        "/hotels/",
+        json={
+            "title": "test_hotel",
+            "location": "test_location",
+        },
+    )
+    assert response.status_code == 403, "Hotel created by not admin user"
+
+
+async def test_create_hotel(admin_ac):
+    response = await admin_ac.post(
         "/hotels/",
         json={
             "title": "test_hotel",
@@ -40,8 +51,8 @@ async def test_create_hotel(ac):
     assert response.json()["data"]["location"] == "test_location"
 
 
-async def test_update_and_patch_hotel(ac):
-    response = await ac.put(
+async def test_update_and_patch_hotel(admin_ac):
+    response = await admin_ac.put(
         "/hotels/1",
         json={
             "title": "updated_test_hotel",
@@ -53,7 +64,7 @@ async def test_update_and_patch_hotel(ac):
     assert response.json()["data"]["title"] == "updated_test_hotel"
     assert response.json()["data"]["location"] == "updated_test_location"
 
-    response = await ac.put(
+    response = await admin_ac.put(
         "/hotels/100",
         json={
             "title": "updated_test_hotel",
@@ -62,7 +73,7 @@ async def test_update_and_patch_hotel(ac):
     )
     assert response.status_code == 404
 
-    response = await ac.patch(
+    response = await admin_ac.patch(
         "/hotels/1",
         json={
             "title": "patched_test_hotel",
@@ -73,7 +84,7 @@ async def test_update_and_patch_hotel(ac):
     assert response.json()["data"]["title"] == "patched_test_hotel"
     assert response.json()["data"]["location"] == "updated_test_location"
 
-    response = await ac.patch(
+    response = await admin_ac.patch(
         "/hotels/1",
         json={
             "location": "patched_test_location",

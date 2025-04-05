@@ -2,6 +2,7 @@ from datetime import date
 
 from fastapi import APIRouter, Body
 
+from src.auth.dependencies import GetAdminIdDep
 from src.dependencies import DBDep
 from src.exceptions import DateRangeException, HotelNotFoundException, RoomNotFoundException
 from src.httpexceptions import (
@@ -20,13 +21,6 @@ router = APIRouter(prefix="/hotels", tags=["Rooms"])
     summary="Получить все свободные номера для конкретного отеля для переданных дат",
 )
 async def get_rooms(hotel_id: int, db: DBDep, date_from: date, date_to: date):
-    # try:
-    #     return await db.rooms.get_filtered_by_date(
-    #         hotel_id=hotel_id, date_from=date_from, date_to=date_to
-    #     )
-    # except DateRangeException:
-    #     raise DateRangeHTTPException
-
     try:
         return await RoomService(db).get_rooms(hotel_id, date_from, date_to)
     except DateRangeException:
@@ -49,6 +43,7 @@ async def get_single_room(hotel_id: int, room_id: int, db: DBDep):
 async def create_room(
     hotel_id: int,
     db: DBDep,
+    admin_id: GetAdminIdDep,
     room_data: RoomIn = Body(
         openapi_examples={
             "1": {
@@ -85,7 +80,13 @@ async def create_room(
     "/{hotel_id}/rooms/{room_id}",
     summary="Обновить отдельную информацию о номере конкретного отеля",
 )
-async def patch_room(hotel_id: int, room_id: int, db: DBDep, room_data: RoomPatchIn = Body()):
+async def patch_room(
+    hotel_id: int,
+    room_id: int,
+    db: DBDep,
+    admin_id: GetAdminIdDep,
+    room_data: RoomPatchIn = Body(),
+):
     """
     Обновление существующей комнаты.
 
@@ -93,23 +94,6 @@ async def patch_room(hotel_id: int, room_id: int, db: DBDep, room_data: RoomPatc
     так и полностью, но для полного обновления лучше
     воспользоваться ручкой с методом PUT 'Обновить комнату'.
     """
-    # try:
-    #     await db.hotels.get_one(id=hotel_id)
-    # except ObjectNotFoundException:
-    #     return HTTPException(status_code=404, detail=f"Hotel with id={hotel_id} not found")
-    #
-    # data = RoomPatch(**room_data.model_dump(exclude_unset=True))
-    # ret_room = None
-    # if any(val is not None for val in data.model_dump().values()):
-    #     try:
-    #         ret_room = await db.rooms.edit(
-    #             data=data, id=room_id, hotel_id=hotel_id, exclude_unset=True
-    #         )
-    #     except ObjectNotFoundException:
-    #         return HTTPException(status_code=404, detail=f"Room with id={room_id} not found")
-    #
-    # await db.rooms_facilities.update(room_data, room_id)
-    # await db.commit()
     try:
         patched_room = await RoomService(db).patch_room(hotel_id, room_id, room_data)
         return {"message": "Room updated", "data": patched_room}
@@ -122,7 +106,13 @@ async def patch_room(hotel_id: int, room_id: int, db: DBDep, room_data: RoomPatc
 @router.put(
     "/{hotel_id}/rooms/{room_id}", summary="Полностью обновить данные о номере конкретного отеля"
 )
-async def update_room(hotel_id: int, room_id: int, db: DBDep, room_data: RoomUpdateIn = Body()):
+async def update_room(
+    hotel_id: int,
+    room_id: int,
+    db: DBDep,
+    admin_id: GetAdminIdDep,
+    room_data: RoomUpdateIn = Body(),
+):
     """
     Обновление существующей комнаты.
 
@@ -143,19 +133,7 @@ async def update_room(hotel_id: int, room_id: int, db: DBDep, room_data: RoomUpd
     "/{hotel_id}/rooms/{room_id}",
     summary="Удалить номер",
 )
-async def delete_room(hotel_id: int, room_id: int, db: DBDep):
-    # try:
-    #     await db.hotels.get_one(id=hotel_id)
-    # except ObjectNotFoundException:
-    #     return HTTPException(status_code=404, detail=f"Hotel with id={hotel_id} not found")
-    #
-    # try:
-    #     await db.rooms.delete(id=room_id, hotel_id=hotel_id)
-    # except ObjectNotFoundException:
-    #     return HTTPException(status_code=404, detail=f"Room with id={room_id} not found")
-    #
-    # await db.commit()
-    # return {"message": "Room deleted"}
+async def delete_room(hotel_id: int, room_id: int, db: DBDep, admin_id: GetAdminIdDep):
     try:
         await RoomService(db).delete_room(hotel_id, room_id)
         return {"message": "Room deleted"}
