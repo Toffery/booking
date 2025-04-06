@@ -18,7 +18,7 @@ from src.exceptions import (
 SECRET_KEY = auth_settings.JWT_SECRET
 ALGORITHM = auth_settings.JWT_ALG
 ACCESS_TOKEN_EXPIRE_MINUTES = auth_settings.JWT_EXP
-REFRESH_TOKEN_EXPIRE_MINUTES = auth_settings.REFRESH_TOKEN_EXP
+REFRESH_TOKEN_EXPIRE_DAYS = auth_settings.REFRESH_TOKEN_EXP_DAYS
 
 
 class AuthService(BaseService):
