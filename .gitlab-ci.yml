@@ -6,6 +6,11 @@ stages:
   - test
   - deploy
 
+workflow:
+ rules:
+   - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+   - if: $CI_COMMIT_BRANCH == "main"
+
 build-job:
   stage: build
   before_script:

@@ -1,68 +1,85 @@
-# Booking API
+## 0. About
 
-### Description
+**Booking** is a simple async API using FastAPI, Pydantic V2, SQLAlchemy 2.0 and PostgreSQL:
 
-This is a simple api for booking hotels. You can create, read, update and delete rooms, facilities for this rooms, hotels with rooms and book concrete rooms if available.
+- [`FastAPI`](https://fastapi.tiangolo.com)
+- [`Pydantic V2`](https://docs.pydantic.dev/2.4/)
+- [`SQLAlchemy 2.0`](https://docs.sqlalchemy.org/en/20/changelog/whatsnew_20.html)
+- [`Celery`](https://docs.celeryq.dev/en/stable/)
+- [`PostgreSQL`](https://www.postgresql.org)
+- [`Redis`](https://redis.io)
+- [`Docker Compose`](https://docs.docker.com/compose/)
+- [`NGINX`](https://nginx.org/en/)
 
-# How to run
+## 1. Contents
 
-You can run this project either using Docker or not.
+0. [About](#0-about)
+1. [Contents](#1-contents)
+2. [Prerequisites](#2-prerequisites)
+3. [Run using docker compose](#3-run-using-docker-compose)
+4. [Run without docker](#4-run-without-docker)
 
-### Using docker-compose
+## 2. Prerequisites
 
-The best way is to run this project using `docker-compose`. You just need `Docker` to be installed installed on your machine. The best way is to install `Docker Desktop` using [official guide](https://docs.docker.com/desktop/).
-
-Once you have installed and run `Docker Desktop` you need to run `Redis` and `PostgreSQL` containers:
-
-```bash
-docker run --name booking_cache \
-    -p 7379:6379 \
-    --network=booking_network \
-    -d redis
-
-docker run --name booking_db \
-    -p 6432:5432 \
-    -e POSTGRES_USER=<posgres_user_name> \
-    -e POSTGRES_PASSWORD=<postgres_user_pass> \
-    -e POSTGRES_DB=booking \
-    --network=booking_network \
-    --volume pg-booking-data:/var/lib/postgresql/data \
-    -d postgres
+Clone this repository 
+```sh
+git clone https://github.com/Toffery/booking.git
 ```
 
-If you want to use `Nginx` as a proxy to your server, run the followind command:
+Create `.env`, `.docker.env` `.test.env` in the root directory of the project and `/path/to/project/auth/.env` files. The `.env` file will be used when running with `python3 src/main.py`, `.docker.env` will be used when running with `docker-compose-all.yml`, `.test.env` will be used when testing.
 
-```bash
-docker run --name booking_nginx \
-    --volume ./nginx.conf:/etc/nginx/nginx.conf \
-    --network=booking_network \
-    --rm -d -p 80:80 nginx
+The project structure will look like this (assuming booking is the root directory of the project):
+
+```sh
+booking
+├── migrations/
+│   ├── ...
+├── src/
+│   ├── auth/
+│      ├──  __init__.py
+│      ├── .env <--- add this
+│      ├── .env.example
+│      ├── ...
+│   ├── bookings/
+│   ├── ...
+├── tests/
+│   ├── ...
+├── ...
+├── .docker.env <--- add this
+├── .env <--- add this
+├── .env.example
+├── ...
+├── .test.env <--- and add this
+├── .test.env.example
+└── ...
 ```
 
-If not, you need to specify the ports in the `docker-compose.yml`:
-
-```yml
-services:
-  booking_backend_service:
-    container_name: 'booking_backend'
-    ports:
-      7777:8000
-    ... 
-```
-
-Now create needed .env files. Make sure `<posgres_user_name>` and `<postgres_user_pass>` have the same values as in `docker run` command.
+Fill them according to the example files or look at the example below:
 
 ```
 # .env
-MODE = LOCAL
+MODE = LOCAL (in remote server use PROD)
 
 DB_NAME = booking
-DB_HOST = booking_db
+DB_HOST = localhost (in remote server use booking_postgres)
 DB_USER = <postgres_user_name>
 DB_PASS = <postgres_user_pass>
 DB_PORT = 5432
 
-REDIS_HOST = booking_cache
+REDIS_HOST = localhost (in remote server use booking_redis)
+REDIS_PORT = 6379
+
+-----------
+# .docker.env
+MODE = DEV
+
+DB_NAME = booking
+DB_HOST = booking_postgres
+DB_USER = <postgres_user_name>
+DB_PASS = <postgres_user_pass>
+DB_PORT = 5432
+
+REDIS_HOST = booking_redis
 REDIS_PORT = 6379
 
 -----------
@@ -70,12 +87,12 @@ REDIS_PORT = 6379
 MODE = TEST
 
 DB_NAME = test_booking
-DB_HOST = booking_db
+DB_HOST = localhost
 DB_USER = <postgres_user_name>
 DB_PASS = <postgres_user_pass>
 DB_PORT = 5432
 
-REDIS_HOST = booking_cache
+REDIS_HOST = localhost
 REDIS_PORT = 6379
 
 -----------
@@ -83,188 +100,111 @@ REDIS_PORT = 6379
 JWT_SECRET = <jwt-secret> # opensll rand -hex 32
 JWT_ALG = HS256
 ACCESS_TOKEN_EXP_MINUTES = 30
-REFRESH_TOKEN_EXP_MINUTES = 30
+REFRESH_TOKEN_EXP_DAYS = 30
 ```
 
-Once you've done with all above, just run:
-
-```bash
-docker-compose up -d
-```
-
-If you used `Nginx`, then go to `localhost`, if not, go to `localhost:7777`.
-
-If you change `nginx.conf` file, restart container:
-
-```
-docker exec booking_nginx nginx -s reload
-```
-
-
-### Using Docker
-
-This repository contains Dockerfile, you can run this project using it.
+## 3. Run using docker-compose
 
 Make sure you installed `Docker` on your machine. The best way is to install `Docker Desktop` using [official guide](https://docs.docker.com/desktop/).
 
-Once you've installed and run `Docker Desktop` you can build and run this project using `Dockerfile`:
+Create `docker network`:
 
-```bash
-docker build -t booking-image .
+```sh
+docker network create my-network
 ```
 
-This command will generate image based on `Dockerfile`. 
+Now to run all services in one command use `docker-compose-all.yml` file:
 
-Then you need to create a docker network using:
-
-```bash
-docker network create booking_network
+```sh
+docker compose -f docker-compose-all.yml up -d
 ```
 
-Next you need to run Redis and PostgreSQL using `Docker`:
+ It will run:
+- **FastAPI app** (booking_backend)
+- **Celery worker** (booking_celery_worker)
+- **Celery beat** (booking_celery_beat)
+- **Redis** (booking_redis)
+- **PostgreSQL** (booking_postgres)
+- **Nginx** (booking_nginx)
 
-```bash
-docker run --name booking_cache \
-    -p 7379:6379 \
-    --network=booking_network \
-    -d redis
+In Docker-Desktop you will see:
 
-docker run --name booking_db \
-    -p 6432:5432 \
-    -e POSTGRES_USER=<posgres_user_name> \
-    -e POSTGRES_PASSWORD=<postgres_user_pass> \
-    -e POSTGRES_DB=booking \
-    --network=booking_network \
-    --volume pg-booking-data:/var/lib/postgresql/data \
-    -d postgres
+![alt text](docker-compose-all.png)
+
+Now you can access to the `FastAPI` app through `Nginx` on `localhost`.
+
+To see the logs of containers type in terminal:
+
+```sh
+docker logs <container_name>
 ```
 
-This commands will run docker containers with `Redis` and `PostgreSQL` using latest versions. 
+For example, to see the logs of `FastAPI` app:
 
-Next create .env file in the root directory of the project. Fill it with according to .env.example file. Make sure `<posgres_user_name>` and `<postgres_user_pass>` have the same values.
-
-```
-MODE = LOCAL
-
-DB_NAME = booking
-DB_HOST = booking_db
-DB_USER = <posgres_user_name>
-DB_PASS = <postgres_user_pass>
-DB_PORT = 6432
-REDIS_HOST = booking_cache
-REDIS_PORT = 7379
+```sh
+docker logs booking_backend
 ```
 
-Then you can run the container based on this image using:
+Optionall you can pass `--follow` for live updating:
 
-```bash
-docker run --name booking_backend \
-    -p 7777:8000 \
-    --network=booking_network \
-    booking-image
+```sh
+docker logs --follow booking_backend
 ```
 
-The API will be available on `0.0.0.0:7777`.
+## 4. Run without Docker
 
-For the `celery` support run the following:
+If you don't want to user `Docker`, follow the next steps:
 
-```bash
-docker run --name booking_celery_worker \
-    --network=booking_network \
-    booking-image \
-    celery --app=src.core.tasks.celery_app:celery_instance worker -l INFO
+1. Make sure PostgreSQL and Redis is running:
 
-docker run --name booking_celery_beat \
-    --network=booking_network \
-    booking-image \
-    celery --app=src.core.tasks.celery_app:celery_instance worker -l INFO -B
-```
+    MacOS:
+    ```sh
+    brew install postgresql
+    brew services start postgresql
+    # for stopping use:
+    # brew services stop postgresql 
 
+    brew install redis
+    brew services start redis
+    # for stopping use:
+    # brew services stop redis
+    ```
 
-### Without Docker
+    For more information go to [Postgresql](https://www.postgresql.org/download/macosx/) and [Redis](https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/install-redis-on-mac-os/).
 
-Make sure PostgreSQL and Redis is running:
+    For Linux: [Postgresql](https://www.postgresql.org/download/linux/), [Redis](https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/install-redis-on-linux/).
 
-MacOS:
-```bash
-brew install postgresql
-brew services start postgresql
-# for stopping use:
-# brew services stop postgresql 
+2. Create a 'booking' table and 'test_booking' table for running tests. You can do it using, for example, [DBeaver](https://dbeaver.io/), or via command-line:
 
-brew install redis
-brew services start redis
-# for stopping use:
-# brew services stop redis
-```
+    ```sh
+    psql -h localhost -p 5432 -U postgres
+    create database booking;
+    create database test_booking;
+    \q
+    ```
 
-For more information go to [Postgresql](https://www.postgresql.org/download/macosx/) and [Redis](https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/install-redis-on-mac-os/). 
+    You can change the names of databases, but don't forget to change .env file.
+    
+3. Follow [Prerequisites](#2-prerequisites). Make sure you created all .env files.
 
-Next you need create a 'booking' table and 'test_booking' table for running tests. You can do it using, for example, [DBeaver](https://dbeaver.io/), or via command-line:
+4. Create virtual env and install necessary dependencies. Run following commands in the root directory of the project:
 
-```bash
-psql -h localhost -p 5432 -U postgres
-create database booking;
-create database test_booking;
-\q
-```
+    ```sh
+    python3 -m venv venv
+    source ./venv/bin/activate
+    python3 -m pip install -r requirements.txt
+    ```
 
-You can change the names of databases, but don't forget to change .env file (will be explained further).
+5. Make migrations using `Alembic`:
 
-Next create .env file in the root directory of the project. Fill it with according to .env.example file. For default parameters you can use this file:
+    ```bash
+    alembic upgrade head
+    ```
 
-```
-MODE = LOCAL
+6. Now you're ready to start. Run the following commang in the root directory of the project:
 
-DB_NAME = booking
-DB_HOST = localhost
-DB_USER = postgres
-DB_PASS = postgres
-DB_PORT = 5432
-REDIS_HOST = localhost
-REDIS_PORT = 6379
-```
+    ```bash
+    python3 src/main.py
+    ```
 
-Make sure to change necessary parameters according to previous steps. 
-
-Then create .env.test file according to the .test.env.example file in the root directory of the project. This will be used for testing using `pytest`.
-
-
-Next create .env file in the directory ```/path/to/project/src/auth/``` anf fill it according to .env.example file in the corresponding directory. 
-
-```
-JWT_SECRET = <your-jwt-secret> 
-JWT_ALG = HS256
-JWT_EXP = 30
-
-REFRESH_TOKEN_KEY = <your-refresh-token-key>
-REFRESH_TOKEN_EXP = 30days
-```
-
-For ```JWT_SECRET``` and ```REFRESH_TOKEN_KEY``` you can use next command in your shell:
-```
-openssl rand -hex 32
-```
-
-This will output rundom secret_key for jwt encoding.
-
-Next make sure you created virtual env and installed necessary dependencies. Run following commands in the root directory of the project:
-
-```bash
-python3 -m venv venv
-source ./venv/bin/activate
-python3 -m pip install -r requirements.txt
-```
-
-Next make migrations using `Alembic`:
-
-```bash
-alembic upgrade head
-```
-
-Now you're ready to start. Run the following commang in the root directory of the project:
-
-```bash
-python3 src/main.py
-```
-
+    API is available on `0.0.0.0:8000`.

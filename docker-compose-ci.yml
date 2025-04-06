@@ -4,6 +4,8 @@ services:
     image: booking-api-image
     networks:
       - booking_network
+    environment:
+      - MODE=PROD
 
   booking_celery_worker_service:
     container_name: 'booking_celery_worker'

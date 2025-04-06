@@ -5,6 +5,18 @@ import pytest
 from tests.conftest import get_db_null_pool
 
 
+async def test_create_not_authenticated_booking(ac):
+    response = await ac.post(
+        "/bookings/",
+        json={
+            "room_id": 1,
+            "date_from": "2024-10-18",
+            "date_to": "2024-10-25",
+        },
+    )
+    assert response.status_code == 401
+
+
 @pytest.mark.parametrize(
     "room_id, date_from, date_to, price, status_code",
     [
@@ -37,21 +49,14 @@ async def test_create_booking(
         assert response.json()["data"]["price"] == price_needed
 
 
-async def test_create_not_authenticated_booking(ac):
-    response = await ac.post(
-        "/bookings/",
-        json={
-            "room_id": 1,
-            "date_from": "2024-10-18",
-            "date_to": "2024-10-25",
-        },
-    )
-    assert response.status_code == 401
-
-
 async def test_get_my_bookings(authenticated_ac):
     response = await authenticated_ac.get("/bookings/me")
     assert response.status_code == 200
+
+
+async def test_get_my_booking_not_authenticated(ac):
+    response = await ac.get("/bookings/me")
+    assert response.status_code == 401
 
 
 @pytest.fixture(scope="module")

@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from src.auth.dependencies import GetAdminIdDep
 from src.dependencies import DBDep
 from src.exceptions import FacilityNotFoundException
 from src.facilities.schemas import FacilityIn
@@ -32,14 +33,16 @@ async def get_facility_by_id(facility_id: int, db: DBDep):
 
 
 @router.post("/")
-async def create_facility(db: DBDep, facility_data: FacilityIn):
+async def create_facility(db: DBDep, admin_id: GetAdminIdDep, facility_data: FacilityIn):
     created_facility = await FacilityService(db).create_facility(facility_data)
 
     return {"message": "Facility created", "data": created_facility}
 
 
 @router.post("/{facility_id}")
-async def update_facility(db: DBDep, facility_id: int, facility_data: FacilityIn):
+async def update_facility(
+    db: DBDep, admin_id: GetAdminIdDep, facility_id: int, facility_data: FacilityIn
+):
     try:
         updated_facility = await FacilityService(db).update_facility(facility_id, facility_data)
         return {"message": "Facility updated", "data": updated_facility}
@@ -48,7 +51,7 @@ async def update_facility(db: DBDep, facility_id: int, facility_data: FacilityIn
 
 
 @router.delete("/{facility_id}")
-async def delete_facility(db: DBDep, facility_id: int):
+async def delete_facility(db: DBDep, admin_id: GetAdminIdDep, facility_id: int):
     try:
         await FacilityService(db).delete_facility(facility_id)
         return {"message": "Facility deleted"}

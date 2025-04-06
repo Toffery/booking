@@ -17,6 +17,11 @@ class UserCreate(BaseModel):
     username: str | None = None
 
 
+class SuperUserCreate(UserCreate):
+    is_admin: bool = True
+    is_superuser: bool = True
+
+
 class UserBase(BaseModel):
     id: int
     email: EmailStr | None = None

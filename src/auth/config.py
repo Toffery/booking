@@ -7,8 +7,7 @@ class AuthSettings(BaseSettings):
     JWT_ALG: str
     JWT_EXP: int = 30  # minutes
 
-    REFRESH_TOKEN_KEY: str
-    REFRESH_TOKEN_EXP: timedelta = timedelta(days=30)
+    REFRESH_TOKEN_EXP_DAYS: int = 30 # days
 
     model_config = SettingsConfigDict(env_file="src/auth/.env")
 

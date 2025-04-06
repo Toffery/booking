@@ -4,6 +4,7 @@ from fastapi_cache.decorator import cache
 
 from fastapi import APIRouter, Body
 
+from src.auth.dependencies import GetAdminIdDep
 from src.exceptions import DateRangeException
 from src.exceptions import ObjectNotFoundException
 from src.hotels.schemas import HotelCreateOrUpdate, HotelPATCH
@@ -62,6 +63,7 @@ async def get_hotel_by_id(
 )
 async def create_hotel(
     db: DBDep,
+    admin_user_id: GetAdminIdDep,
     hotel_data: HotelCreateOrUpdate = Body(
         openapi_examples={
             "1": {
@@ -92,6 +94,7 @@ async def create_hotel(
 )
 async def update_hotel(
     db: DBDep,
+    admin_user_id: GetAdminIdDep,
     hotel_id: int,
     hotel_data: HotelCreateOrUpdate = Body(),
 ):
@@ -109,7 +112,12 @@ async def update_hotel(
         Возможно как обновить какие-либо поля по отдельности, так и полностью, \
         но для полного обновления лучше воспользоваться ручкой с методом PUT 'Обновить отель'.",
 )
-async def patch_hotel(db: DBDep, hotel_id: int, hotel_data: HotelPATCH = Body()):
+async def patch_hotel(
+    db: DBDep,
+    admin_user_id: GetAdminIdDep,
+    hotel_id: int,
+    hotel_data: HotelPATCH = Body(),
+):
     try:
         patched_hotel = await HotelService(db).patch_hotel(hotel_id, hotel_data)
         return {"message": "Hotel updated", "data": patched_hotel}
@@ -120,7 +128,11 @@ async def patch_hotel(db: DBDep, hotel_id: int, hotel_data: HotelPATCH = Body())
 @router.delete(
     "/{hotel_id}", summary="Удалить отель", description="Удаление существующего отеля по его id."
 )
-async def delete_hotel(db: DBDep, hotel_id: int):
+async def delete_hotel(
+    db: DBDep,
+    admin_user_id: GetAdminIdDep,
+    hotel_id: int,
+):
     try:
         deleted_hotel = await HotelService(db).delete_hotel(hotel_id)
         return {"message": "Hotel deleted", "data": deleted_hotel}
